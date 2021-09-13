@@ -21,6 +21,8 @@ public class PointMapper : MonoBehaviour
 
     public Text confDebug;
 
+    public Text pointDebug;
+
     private void Start()
     {
         // pointCloud = pointCloudManager.pointCloudPrefab.GetComponent<ARPointCloud>();
@@ -47,6 +49,8 @@ public class PointMapper : MonoBehaviour
 
                 debugText.text = cloudSize + " Points found in cloud!";
 
+                List<Vector3> sessionPoints = new List<Vector3>();
+
                 Vector3[] positions = new Vector3[cloudSize];
 
                 ((Unity.Collections.NativeSlice<Vector3>) pointCloud.positions)
@@ -68,6 +72,8 @@ public class PointMapper : MonoBehaviour
                         markedPoints.Add (newMarker);
                     }
                 }
+
+                pointDebug.text = "p: " + markedPoints[markedPoints.Count - 1];
             }
             else
             {
