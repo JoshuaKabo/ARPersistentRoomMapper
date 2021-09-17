@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 // using UnityEngine.ARFoundation;
 using UnityEngine.XR.ARFoundation;
+using System.IO;
 
 public class PointMapper : MonoBehaviour
 {
@@ -13,20 +14,27 @@ public class PointMapper : MonoBehaviour
 
     public float necessaryConfidenceAmt = 0.9f;
 
-    private List<GameObject> markedPoints;
+    private List<GameObject> visuallyMarkedPoints;
+    private List<Vector3> pointsForObj;
 
     public GameObject marker;
 
     public Text debugText;
 
     public Text confDebug;
+    public Text fileDebug;
 
-    public Text pointDebug;
+    public string fileName = "pointmapping.obj";
+
+    // ends up in Pixel 2 XL\Internal shared storage\Android\data\com.DefaultCompany.ARMappingTool\files
+    private string filePath;
 
     private void Start()
     {
+        filePath = Application.persistentDataPath + "/" + fileName;
         // pointCloud = pointCloudManager.pointCloudPrefab.GetComponent<ARPointCloud>();
-        markedPoints = new List<GameObject>();
+        visuallyMarkedPoints = new List<GameObject>();
+        pointsForObj = new List<Vector3>();
         confDebug.text = "conf: " + necessaryConfidenceAmt;
     }
 
@@ -53,7 +61,7 @@ public class PointMapper : MonoBehaviour
 
                 Vector3[] positions = new Vector3[cloudSize];
 
-                ((Unity.Collections.NativeSlice<Vector3>) pointCloud.positions)
+                ((Unity.Collections.NativeSlice<Vector3>)pointCloud.positions)
                     .CopyTo(positions);
 
                 // Unity.Collections.NativeArray<Vector3> positions =
@@ -67,13 +75,11 @@ public class PointMapper : MonoBehaviour
                 {
                     if (confidences[i] >= necessaryConfidenceAmt)
                     {
-                        GameObject newMarker = Instantiate(marker);
-                        marker.transform.position = positions[i];
-                        markedPoints.Add (newMarker);
+                        // markPointVisually(positions, i);
+                        markPointForObj(positions[i]);
                     }
                 }
 
-                pointDebug.text = "p: " + markedPoints[markedPoints.Count - 1];
             }
             else
             {
@@ -82,15 +88,56 @@ public class PointMapper : MonoBehaviour
         }
     }
 
+    public void writeToObj()
+    {
+        // https://github.com/HookJabs/CS240_3DRenderer/blob/master/crystals.obj
+        // https://answers.unity.com/questions/539339/saving-data-in-to-files-android.html
+
+        try
+        {
+            string[] objLines = new string[pointsForObj.Count + 3];
+            objLines[0] = "# ARZombieMapper vertex obj output";
+            objLines[1] = "mtllib pointmapping.mtl";
+            objLines[2] = "o Pointmapping";
+
+            for (int index = 0; index < pointsForObj.Count; index++)
+            {
+                Vector3 currentPoint = pointsForObj[index];
+                // blender, why is it x, z, -y??
+                objLines[index + 3] = "v " + currentPoint.x + " " + currentPoint.z + " " + -1 * currentPoint.y;
+            }
+
+            File.WriteAllLines(filePath, objLines);
+            fileDebug.text = objLines.Length + " Lines written successfully!";
+        }
+        catch (System.Exception e)
+        {
+            fileDebug.text = "Write to file threw an error.";
+            Debug.Log(e);
+        }
+    }
+
+    private void markPointForObj(Vector3 point)
+    {
+        pointsForObj.Add(point);
+    }
+
+    private void markPointVisually(Vector3[] positions, int i)
+    {
+        GameObject newMarker = Instantiate(marker);
+        marker.transform.position = positions[i];
+        visuallyMarkedPoints.Add(newMarker);
+    }
+
     // delete all points
     public void Wipe()
     {
-        for (int i = 0; i < markedPoints.Count; i++)
+        for (int i = 0; i < visuallyMarkedPoints.Count; i++)
         {
-            GameObject toDelete = markedPoints[i];
-            Destroy (toDelete);
+            GameObject toDelete = visuallyMarkedPoints[i];
+            Destroy(toDelete);
         }
-        markedPoints.Clear();
+        visuallyMarkedPoints.Clear();
     }
 
     public void setConf(float val)
