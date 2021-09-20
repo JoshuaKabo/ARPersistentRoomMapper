@@ -2,15 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-// using UnityEngine.ARFoundation;
 using UnityEngine.XR.ARFoundation;
 using System.IO;
 
-public class PointMapper : MonoBehaviour
+/*
+TODO: Create classes to track one of each - EVENT updates, and ALL data.
+Events might make corrections, leading to fewer floating obstacles
+*/
+
+public class PointALLMapper : MonoBehaviour
 {
     public ARPointCloudManager pointCloudManager;
-
-    private ARPointCloud pointCloud;
 
     public float necessaryConfidenceAmt = 0.9f;
 
@@ -24,6 +26,8 @@ public class PointMapper : MonoBehaviour
     public Text confDebug;
     public Text fileDebug;
 
+    private float mappingInitTime;
+
     public string fileName = "pointmapping.obj";
 
     // ends up in Pixel 2 XL\Internal shared storage\Android\data\com.DefaultCompany.ARMappingTool\files
@@ -32,10 +36,10 @@ public class PointMapper : MonoBehaviour
     private void Start()
     {
         filePath = Application.persistentDataPath + "/" + fileName;
-        // pointCloud = pointCloudManager.pointCloudPrefab.GetComponent<ARPointCloud>();
         visuallyMarkedPoints = new List<GameObject>();
         pointsForObj = new List<Vector3>();
         confDebug.text = "conf: " + necessaryConfidenceAmt;
+        mappingInitTime = Time.time;
     }
 
     private void Update()
@@ -64,8 +68,6 @@ public class PointMapper : MonoBehaviour
                 ((Unity.Collections.NativeSlice<Vector3>)pointCloud.positions)
                     .CopyTo(positions);
 
-                // Unity.Collections.NativeArray<Vector3> positions =
-                //     (Unity.Collections.NativeArray<Vector3>) pointCloud.positions;
                 Unity.Collections.NativeArray<float> confidences =
                     (Unity.Collections.NativeArray<float>)
                     pointCloud.confidenceValues;
@@ -76,7 +78,7 @@ public class PointMapper : MonoBehaviour
                     if (confidences[i] >= necessaryConfidenceAmt)
                     {
                         // markPointVisually(positions, i);
-                        markPointForObj(positions[i]);
+                        markPointForObj(new Vector3(positions[i].x, positions[i].y, positions[i].z));
                     }
                 }
 
@@ -95,16 +97,19 @@ public class PointMapper : MonoBehaviour
 
         try
         {
-            string[] objLines = new string[pointsForObj.Count + 3];
-            objLines[0] = "# ARZombieMapper vertex obj output";
-            objLines[1] = "mtllib pointmapping.mtl";
-            objLines[2] = "o Pointmapping";
+            float timeSinceRecording = Time.time - mappingInitTime;
+            string[] objLines = new string[pointsForObj.Count + 5];
+            objLines[0] = "# ARZombieMapper vertex obj output (ALL POINTS, no event used.)";
+            objLines[1] = "# Confidence threshold: " + necessaryConfidenceAmt;
+            objLines[2] = "# Time spent collecting data: " + timeSinceRecording;
+            objLines[3] = "mtllib pointmapping.mtl";
+            objLines[4] = "o Pointmapping";
 
             for (int index = 0; index < pointsForObj.Count; index++)
             {
                 Vector3 currentPoint = pointsForObj[index];
                 // blender, why is it x, z, -y??
-                objLines[index + 3] = "v " + currentPoint.x + " " + currentPoint.z + " " + -1 * currentPoint.y;
+                objLines[index + 5] = "v " + currentPoint.x + " " + currentPoint.z + " " + -1 * currentPoint.y;
             }
 
             File.WriteAllLines(filePath, objLines);
@@ -138,11 +143,16 @@ public class PointMapper : MonoBehaviour
             Destroy(toDelete);
         }
         visuallyMarkedPoints.Clear();
+
+        pointsForObj.Clear();
     }
 
     public void setConf(float val)
     {
+        // Wipe and restart timer for the sake of pure data
+        Wipe();
         necessaryConfidenceAmt = val;
         confDebug.text = "conf: " + necessaryConfidenceAmt;
+        mappingInitTime = Time.time;
     }
 }
