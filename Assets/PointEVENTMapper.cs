@@ -13,11 +13,17 @@ TODO: The keys to look for in the event mapper vs the all mapper:
     I should just set up a simple particle visualizer in Unity!!
     It'll be like loading into blender, but it will also use color to depict
     confidence values
+
+    NOTE: confidence might not be as important when it comes to event based mapping
+    But I'll leave that to observations from data.
+
+    NOTE: I may want to map result objects as their individual point clouds rather than combining them...
 */
 
 public class PointEVENTMapper : MonoBehaviour
 {
     public ARPointCloudManager pointCloudManager;
+    public List<ARPointCloud> cloudsTracked;
 
     public float necessaryConfidenceAmt = 0.9f;
 
@@ -33,21 +39,37 @@ public class PointEVENTMapper : MonoBehaviour
 
     private float mappingInitTime;
 
-    public string fileName = "pointmapping.obj";
+    private void Awake()
+    {
+        pointCloudManager.pointCloudsChanged += ctx => trackPointCloud(ctx.added, ctx.updated);
+    }
 
-    // ends up in Pixel 2 XL\Internal shared storage\Android\data\com.DefaultCompany.ARMappingTool\files
-    private string filePath;
+    private void trackPointCloud(List<ARPointCloud> added, List<ARPointCloud> updated)
+    {
+        // be sure to create new copies of those tracked, so they don't get deleted.
+        // note - each plane has it's own subsumed by getter.
+        // perhaps I can equality check <added> against <updated> to prevent double counting.
+        // TODO: first try, just see if updated matches added in the end (because they should be taking care of themselves)
+        // ALSO, see if moving to a fresh room wipes all I tracked
+
+
+        foreach (ARPointCloud cloud in added)
+        {
+            // this, naievely, assumes that the updates will be reflected, and removed planes will stay in my own tracker 
+            // (I want them to stay).
+            cloudsTracked.Add(cloud);
+        }
+    }
 
     private void Start()
     {
-        filePath = Application.persistentDataPath + "/" + fileName;
         visuallyMarkedPoints = new List<GameObject>();
         pointsForObj = new List<Vector3>();
         confDebug.text = "conf: " + necessaryConfidenceAmt;
         mappingInitTime = Time.time;
     }
 
-    private void Update()
+    private void cloudsToPoints()
     {
         foreach (ARPointCloud pointCloud in pointCloudManager.trackables)
         {
@@ -100,11 +122,20 @@ public class PointEVENTMapper : MonoBehaviour
         // https://github.com/HookJabs/CS240_3DRenderer/blob/master/crystals.obj
         // https://answers.unity.com/questions/539339/saving-data-in-to-files-android.html
 
+        // get all points out of the cloud collection
+        cloudsToPoints();
+
+        // ends up in Pixel 2 XL\Internal shared storage\Android\data\com.DefaultCompany.ARMappingTool\files
+        string fileName = "pointmapping" + System.DateTime.Now + ".obj";
+        string filePath = Application.persistentDataPath + "/" + fileName;
+
         try
         {
+            // TODO: add confidence values into the obj file. I can then color particles based on conf
+            //       in my own visualizer.
             float timeSinceRecording = Time.time - mappingInitTime;
-            string[] objLines = new string[pointsForObj.Count + 5];
-            objLines[0] = "# ARZombieMapper vertex obj output (ALL POINTS, no event used.)";
+            string[] objLines = new string[pointsForObj.Count + 4];
+            objLines[0] = "# ARZombieMapper vertex obj output EVENT points)";
             objLines[1] = "# Confidence threshold: " + necessaryConfidenceAmt;
             objLines[2] = "# Time spent collecting data: " + timeSinceRecording;
             objLines[3] = "mtllib pointmapping.mtl";
@@ -139,7 +170,7 @@ public class PointEVENTMapper : MonoBehaviour
         visuallyMarkedPoints.Add(newMarker);
     }
 
-    // delete all points
+    // delete all tracked things
     public void Wipe()
     {
         for (int i = 0; i < visuallyMarkedPoints.Count; i++)
@@ -150,6 +181,7 @@ public class PointEVENTMapper : MonoBehaviour
         visuallyMarkedPoints.Clear();
 
         pointsForObj.Clear();
+        cloudsTracked.Clear();
     }
 
     public void setConf(float val)

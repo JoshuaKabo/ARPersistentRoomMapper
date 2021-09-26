@@ -28,14 +28,10 @@ public class PointALLMapper : MonoBehaviour
 
     private float mappingInitTime;
 
-    public string fileName = "pointmapping.obj";
 
-    // ends up in Pixel 2 XL\Internal shared storage\Android\data\com.DefaultCompany.ARMappingTool\files
-    private string filePath;
 
     private void Start()
     {
-        filePath = Application.persistentDataPath + "/" + fileName;
         visuallyMarkedPoints = new List<GameObject>();
         pointsForObj = new List<Vector3>();
         confDebug.text = "conf: " + necessaryConfidenceAmt;
@@ -95,8 +91,15 @@ public class PointALLMapper : MonoBehaviour
         // https://github.com/HookJabs/CS240_3DRenderer/blob/master/crystals.obj
         // https://answers.unity.com/questions/539339/saving-data-in-to-files-android.html
 
+
+        // ends up in Pixel 2 XL\Internal shared storage\Android\data\com.DefaultCompany.ARMappingTool\files
+        string fileName = "pointmapping" + System.DateTime.Now + ".obj";
+        string filePath = Application.persistentDataPath + "/" + fileName;
+
         try
         {
+            // TODO: add confidence values into the obj file. I can then color particles based on conf
+            //       in my own visualizer.
             float timeSinceRecording = Time.time - mappingInitTime;
             string[] objLines = new string[pointsForObj.Count + 5];
             objLines[0] = "# ARZombieMapper vertex obj output (ALL POINTS, no event used.)";
