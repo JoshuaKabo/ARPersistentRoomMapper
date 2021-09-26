@@ -7,10 +7,45 @@ using UnityEngine.XR.ARFoundation;
 using System.IO;
 
 /*
+
+
+
+
+
+
+NOTE (FINAL): After experimenting with rectangle mapping more, I have concluded that its limited data yield 
+and high risk of incorrect polygons generated in favor of realtime interactive surfaces is not in my best interest.
+I will be using pointclouds. Maybe I'll combine pointclouds w/ ARPLanes if I'm desparate.
+Give up on ARPlanes.
+
+
+
+
+
+
+
+
+
 TODO: Create classes to track one of each - EVENT updates, and ALL data.
 Events might make corrections, leading to fewer floating obstacles
 
 TODO: because planemanger planes are removed, I might need to heavily customize planemanager to prevent this.
+
+NOTE: Maybe I'm looking into it too far. It appears there isn't more granular data as far as the rects go, they really
+are 2 dimesional boundaries with a worldspace center point.
+or maybe the boundary field has a polygon with higher dimensional data?
+
+Hierarchy: 
+(This Class)
+ARPlaneManager
+    Subsystem and XRRaycasts develop an ARPlane
+ARPlaneMeshVisualizer(Attached to the "ARPlane" Prefabs!)
+ARPlaneMeshGenerators(Static) GenerateMesh
+
+
+Finally - could look into Google ARCore's image depth features paired with anchors to stitch together a 3d model
+of depth images, then peek into those images to give the model more detail.
+-BUT I want to be as cross plat as possible, and I think what unity gives me will be good enough-
 */
 
 public class RectEVENTMapper : MonoBehaviour
@@ -62,6 +97,7 @@ public class RectEVENTMapper : MonoBehaviour
             // this, naievely, assumes that the updates will be reflected, and removed planes will stay in my own tracker 
             // (I want them to stay).
             planesTracked.Add(plane);
+            // plane.
         }
     }
 
