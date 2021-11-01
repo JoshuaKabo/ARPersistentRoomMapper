@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 4616244918499209103}
   - component: {fileID: 6066960611471741502}
   m_Layer: 0
-  m_Name: BillboardSprite
+  m_Name: VisualizerPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

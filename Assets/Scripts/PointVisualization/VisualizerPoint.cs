@@ -11,7 +11,7 @@ public class VisualizerPoint : MonoBehaviour
         group, confidence
     };
 
-    public Colormode displayMode;
+    public Colormode displayMode = Colormode.confidence;
 
     public Color groupColor;
     public Color confidenceColor;
@@ -37,7 +37,12 @@ public class VisualizerPoint : MonoBehaviour
         applyColor();
     }
 
-    public void applyColor()
+    // public void changeColorMode()
+    // {
+
+    // }
+
+    private void applyColor()
     {
         switch (displayMode)
         {
