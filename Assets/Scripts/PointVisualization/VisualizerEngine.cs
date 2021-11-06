@@ -21,7 +21,12 @@ public class VisualizerEngine : MonoBehaviour
     // get a bunch of vec5s (or vec4s with shorts on an end)
     // represent group num, confidence, and 3 spacial dimensions
 
-    private List<VisualizerPointDataObject> points;
+    // NOTE: this is memory inefficient, do something better in production
+    private List<VisualizerPointDataObject> uninitializedPoints;
+    private List<GameObject> createdPoints;
+
+    // start @ -1 because the first readable line of any of these files will be a fresh object
+    private static int currGroupNum = -1;
 
 
     public static void readData()
@@ -35,8 +40,24 @@ public class VisualizerEngine : MonoBehaviour
 
                 while ((lineIn = streamReader.ReadLine()) != null)
                 {
-                    curLine++;
+                    // the first 3 lines are metadata
+                    if (curLine <= 4)
+                    {
+                        continue;
+                    }
+                    // this is a new object, meaning it's part of a fresh group
+                    if (lineIn[0] == 'o')
+                    {
+                        currGroupNum++;
+                        continue;
+                    }
 
+
+                    /*
+                    proper data reading and initialization goes here.
+                    */
+
+                    curLine++;
                 }
             }
         }

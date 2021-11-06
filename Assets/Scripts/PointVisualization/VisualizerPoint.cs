@@ -37,10 +37,16 @@ public class VisualizerPoint : MonoBehaviour
         applyColor();
     }
 
-    // public void changeColorMode()
-    // {
+    // ChangeColorMode applies the new mode and updates the color to match
+    public void changeColorMode()
+    {
+        // progress w/ wraparound
+        displayMode += 1;
+        if (displayMode > Colormode.confidence)
+            displayMode = Colormode.group;
 
-    // }
+        applyColor();
+    }
 
     private void applyColor()
     {
