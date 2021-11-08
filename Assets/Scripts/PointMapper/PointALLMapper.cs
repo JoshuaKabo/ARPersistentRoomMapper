@@ -111,8 +111,9 @@ public class PointALLMapper : MonoBehaviour
             for (int index = 0; index < pointsForObj.Count; index++)
             {
                 Vector3 currentPoint = pointsForObj[index];
-                // blender, why is it x, z, -y??
-                objLines[index + 5] = "v " + currentPoint.x + " " + currentPoint.z + " " + -1 * currentPoint.y;
+                //[DEPRECATED blender, why is it x, z, -y??]
+                // now using x y z and my own visualizer
+                objLines[index + 5] = "v " + currentPoint.x + " " + currentPoint.y + " " + currentPoint.z;
             }
 
             File.WriteAllLines(filePath, objLines);

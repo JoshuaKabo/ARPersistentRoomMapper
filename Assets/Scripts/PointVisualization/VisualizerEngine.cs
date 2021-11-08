@@ -12,11 +12,11 @@ I want clean&management up to be as quick and easy as poss
 public class VisualizerEngine : MonoBehaviour
 {
 
-    public static string filePath = "Assets/MappedDemos/MappedDemo1.obj";
+    public string filePath = "Assets/MappedDemos/MappedDemo1.obj";
 
-    private static Color[] groupColors;
+    private Color[] groupColors;
 
-    public static GameObject pointPrefab;
+    public GameObject pointPrefab;
     // read the file
     // get a bunch of vec5s (or vec4s with shorts on an end)
     // represent group num, confidence, and 3 spacial dimensions
@@ -26,12 +26,14 @@ public class VisualizerEngine : MonoBehaviour
     private List<GameObject> createdPoints;
 
     // start @ -1 because the first readable line of any of these files will be a fresh object
-    private static int currGroupNum = -1;
+    private int currGroupNum = -1;
+
+    private const int NUM_METADATA_LINES = 3;
 
 
-    public static void readData()
+    public void readData()
     {
-        int curLine = 0;
+        int curLineNo = 0;
         try
         {
             using (System.IO.StreamReader streamReader = new System.IO.StreamReader(filePath))
@@ -40,16 +42,25 @@ public class VisualizerEngine : MonoBehaviour
 
                 while ((lineIn = streamReader.ReadLine()) != null)
                 {
-                    // the first 3 lines are metadata
-                    if (curLine <= 4)
+                    lineIn = lineIn.Trim();
+                    lineIn = lineIn.ToLower();
+
+                    if (shouldSkipLine(lineIn, curLineNo))
                     {
                         continue;
                     }
+                    // TODO: test if char comparison plays nicely with == here
                     // this is a new object, meaning it's part of a fresh group
-                    if (lineIn[0] == 'o')
+                    else if (lineIn[0] == 'o')
                     {
                         currGroupNum++;
                         continue;
+                    }
+                    else
+                    {
+                        // TODO: bake actual geometry into the production models, don't rebuild geo each time
+
+
                     }
 
 
@@ -57,7 +68,7 @@ public class VisualizerEngine : MonoBehaviour
                     proper data reading and initialization goes here.
                     */
 
-                    curLine++;
+                    curLineNo++;
                 }
             }
         }
@@ -78,13 +89,18 @@ public class VisualizerEngine : MonoBehaviour
         drawVisualization();
     }
 
+    // ignore metadata, blank, and definition lines...
+    private bool shouldSkipLine(string line, int lineNo)
+    {
+        return lineNo <= NUM_METADATA_LINES || line.Substring(0, 6).Equals("mtllib") || line.Length <= 0;
+    }
 
-    public static void drawVisualization()
+    public void drawVisualization()
     {
 
     }
 
-    private static void drawPoint(int groupnum, float confidence)
+    private void drawPoint(int groupnum, float confidence)
     {
         // (at position)
         GameObject createdPoint = Instantiate(pointPrefab);
