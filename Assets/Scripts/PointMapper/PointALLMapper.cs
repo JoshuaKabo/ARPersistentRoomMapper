@@ -17,7 +17,7 @@ public class PointALLMapper : MonoBehaviour
     public float necessaryConfidenceAmt = 0.9f;
 
     private List<GameObject> visuallyMarkedPoints;
-    private List<Vector3> pointsForObj;
+    private List<Vector4> pointsForObj;
 
     public GameObject marker;
 
@@ -33,7 +33,7 @@ public class PointALLMapper : MonoBehaviour
     private void Start()
     {
         visuallyMarkedPoints = new List<GameObject>();
-        pointsForObj = new List<Vector3>();
+        pointsForObj = new List<Vector4>();
         confDebug.text = "conf: " + necessaryConfidenceAmt;
         mappingInitTime = Time.time;
     }
@@ -57,8 +57,6 @@ public class PointALLMapper : MonoBehaviour
 
                 debugText.text = cloudSize + " Points found in cloud!";
 
-                List<Vector3> sessionPoints = new List<Vector3>();
-
                 Vector3[] positions = new Vector3[cloudSize];
 
                 ((Unity.Collections.NativeSlice<Vector3>)pointCloud.positions)
@@ -74,7 +72,7 @@ public class PointALLMapper : MonoBehaviour
                     if (confidences[i] >= necessaryConfidenceAmt)
                     {
                         // markPointVisually(positions, i);
-                        markPointForObj(new Vector3(positions[i].x, positions[i].y, positions[i].z));
+                        markPointForObj(new Vector3(positions[i].x, positions[i].y, positions[i].z, confidences[i]));
                     }
                 }
 
@@ -111,9 +109,8 @@ public class PointALLMapper : MonoBehaviour
             for (int index = 0; index < pointsForObj.Count; index++)
             {
                 Vector3 currentPoint = pointsForObj[index];
-                //[DEPRECATED blender, why is it x, z, -y??]
-                // now using x y z and my own visualizer
-                objLines[index + 5] = "v " + currentPoint.x + " " + currentPoint.y + " " + currentPoint.z;
+                // prepare x, y, z, then confidence
+                objLines[index + 5] = "v " + currentPoint.x + ' ' + currentPoint.y + ' ' + currentPoint.z + ' ' + currentPoint.w;
             }
 
             File.WriteAllLines(filePath, objLines);

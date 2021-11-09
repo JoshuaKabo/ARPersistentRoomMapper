@@ -3,54 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /*
-
-
-
-
-
-
-
-
-
-
-
-
-TODO: PointALLMapper (and event) need to store confidence values in their files... 
-      means I'll stop honoring .obj for now, not that I got much use out of it
-
-      Leaves a few possibilities
-
-      1) leave confidence in production for the sake of model dependability
-      2) take confidence back out, no need to waste space
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    options for confidence long term use:
+    1) leave confidence in production for the sake of model dependability
+    2) take confidence back out, no need to waste space
 */
 
 
@@ -64,8 +19,7 @@ public class VisualizerEngine : MonoBehaviour
 
     public GameObject pointPrefab;
     // read the file
-    // get a bunch of vec5s (or vec4s with shorts on an end)
-    // represent group num, confidence, and 3 spacial dimensions
+    // each is group num, confidence, and 3 spacial dimensions
 
     // NOTE: this is memory inefficient, do something better in production
     private List<VisPointDataObject> uninitializedPoints;
@@ -108,7 +62,7 @@ public class VisualizerEngine : MonoBehaviour
 
                         string[] positioning = lineIn.Split(' ');
 
-                        float x, y, z;
+                        float x, y, z, conf;
 
                         Debug.Log("x: " + positioning[0]);
                         x = float.Parse(positioning[0]);
@@ -116,8 +70,10 @@ public class VisualizerEngine : MonoBehaviour
                         y = float.Parse(positioning[1]);
                         Debug.Log("z: " + positioning[2]);
                         z = float.Parse(positioning[2]);
+                        Debug.Log("conf: " + positioning[3]);
+                        conf = float.Parse(positioning[3]);
 
-                        instantiateVisPoint(x, y, z);
+                        instantiateVisPoint(x, y, z, conf);
                     }
 
                     curLineNo++;
