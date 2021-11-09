@@ -3,8 +3,54 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /*
-nvm not going to do this in engine b/c
-I want clean&management up to be as quick and easy as poss
+
+
+
+
+
+
+
+
+
+
+
+
+TODO: PointALLMapper (and event) need to store confidence values in their files... 
+      means I'll stop honoring .obj for now, not that I got much use out of it
+
+      Leaves a few possibilities
+
+      1) leave confidence in production for the sake of model dependability
+      2) take confidence back out, no need to waste space
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 */
 
 
@@ -22,7 +68,7 @@ public class VisualizerEngine : MonoBehaviour
     // represent group num, confidence, and 3 spacial dimensions
 
     // NOTE: this is memory inefficient, do something better in production
-    private List<VisualizerPointDataObject> uninitializedPoints;
+    private List<VisPointDataObject> uninitializedPoints;
     private List<GameObject> createdPoints;
 
     // start @ -1 because the first readable line of any of these files will be a fresh object
@@ -56,17 +102,23 @@ public class VisualizerEngine : MonoBehaviour
                         currGroupNum++;
                         continue;
                     }
-                    else
+                    else if (lineIn[0] == 'v')
                     {
-                        // TODO: bake actual geometry into the production models, don't rebuild geo each time
+                        // NOTE (Much later): bake actual geometry into the production models, don't rebuild geo each time
 
+                        string[] positioning = lineIn.Split(' ');
 
+                        float x, y, z;
+
+                        Debug.Log("x: " + positioning[0]);
+                        x = float.Parse(positioning[0]);
+                        Debug.Log("y: " + positioning[1]);
+                        y = float.Parse(positioning[1]);
+                        Debug.Log("z: " + positioning[2]);
+                        z = float.Parse(positioning[2]);
+
+                        instantiateVisPoint(x, y, z);
                     }
-
-
-                    /*
-                    proper data reading and initialization goes here.
-                    */
 
                     curLineNo++;
                 }
@@ -79,14 +131,23 @@ public class VisualizerEngine : MonoBehaviour
         }
 
 
-        // Where 69 should actually be the ending group number
-        groupColors = new Color[69];
-        for (int i = 0; i < groupColors.Length; i++)
+        if (currGroupNum >= 0)
         {
-            groupColors[i] = UnityEngine.Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
+            groupColors = new Color[currGroupNum];
+            for (int i = 0; i < groupColors.Length; i++)
+            {
+                groupColors[i] = UnityEngine.Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
+            }
         }
 
-        drawVisualization();
+        // colors all the points appropriately
+        finalizeVisPoints();
+    }
+
+
+    private void instantiateVisPoint(float x, float y, float z)
+    {
+        //TODO: Implementation
     }
 
     // ignore metadata, blank, and definition lines...
@@ -95,22 +156,24 @@ public class VisualizerEngine : MonoBehaviour
         return lineNo <= NUM_METADATA_LINES || line.Substring(0, 6).Equals("mtllib") || line.Length <= 0;
     }
 
-    public void drawVisualization()
+    public void finalizeVisPoints()
     {
+        //TODO: Implementation
+        // calls my fancy initialize on the instantiated points
 
+        // default to confidence for now
+        // pointVisualizer.initialize(groupColors[groupnum], confidence, groupnum);
     }
 
     private void drawPoint(int groupnum, float confidence)
     {
         // (at position)
         GameObject createdPoint = Instantiate(pointPrefab);
-        VisualizerPoint pointVisualizer = createdPoint.GetComponent<VisualizerPoint>();
-        // default to confidence for now
-        pointVisualizer.initialize(groupColors[groupnum], confidence, groupnum);
+        VisPoint pointVisualizer = createdPoint.GetComponent<VisPoint>();
     }
 }
 
-struct VisualizerPointDataObject
+struct VisPointDataObject
 {
     // NOTE: not sure where groupnum is to be determined... During reading??
     public int groupnum { get; }
@@ -119,7 +182,7 @@ struct VisualizerPointDataObject
     public float z { get; }
     public float w { get; }
 
-    public VisualizerPointDataObject(int groupnum, float x, float y, float z, float w)
+    public VisPointDataObject(int groupnum, float x, float y, float z, float w)
     {
         this.groupnum = groupnum;
         this.x = x;
