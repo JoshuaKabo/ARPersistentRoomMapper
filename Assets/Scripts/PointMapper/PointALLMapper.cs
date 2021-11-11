@@ -6,8 +6,7 @@ using UnityEngine.XR.ARFoundation;
 using System.IO;
 
 /*
-TODO: Create classes to track one of each - EVENT updates, and ALL data.
-Events might make corrections, leading to fewer floating obstacles
+    The idea is that ALL mapper just grabs everything (maybe even duplicates?), while EVENT mapper might make corrections
 */
 
 public class PointALLMapper : MonoBehaviour
@@ -72,7 +71,7 @@ public class PointALLMapper : MonoBehaviour
                     if (confidences[i] >= necessaryConfidenceAmt)
                     {
                         // markPointVisually(positions, i);
-                        markPointForObj(new Vector3(positions[i].x, positions[i].y, positions[i].z, confidences[i]));
+                        markPointForObj(new Vector4(positions[i].x, positions[i].y, positions[i].z, confidences[i]));
                     }
                 }
 
@@ -108,7 +107,7 @@ public class PointALLMapper : MonoBehaviour
 
             for (int index = 0; index < pointsForObj.Count; index++)
             {
-                Vector3 currentPoint = pointsForObj[index];
+                Vector4 currentPoint = pointsForObj[index];
                 // prepare x, y, z, then confidence
                 objLines[index + 5] = "v " + currentPoint.x + ' ' + currentPoint.y + ' ' + currentPoint.z + ' ' + currentPoint.w;
             }

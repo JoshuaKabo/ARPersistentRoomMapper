@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class VisPoint : MonoBehaviour
+public class VizualizerPoint : MonoBehaviour
 {
     public SpriteRenderer sprite;
 

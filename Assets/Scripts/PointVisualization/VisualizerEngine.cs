@@ -15,7 +15,7 @@ public class VisualizerEngine : MonoBehaviour
 
     public string filePath = "Assets/MappedDemos/MappedDemo1.obj";
 
-    private Color[] groupColors;
+    private List<Color> groupColors;
 
     public GameObject pointPrefab;
     // read the file
@@ -29,6 +29,18 @@ public class VisualizerEngine : MonoBehaviour
     private int currGroupNum = -1;
 
     private const int NUM_METADATA_LINES = 3;
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            readData();
+        }
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            changeColorMode();
+        }
+    }
 
 
     public void readData()
@@ -54,6 +66,7 @@ public class VisualizerEngine : MonoBehaviour
                     else if (lineIn[0] == 'o')
                     {
                         currGroupNum++;
+                        groupColors[currGroupNum] = UnityEngine.Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
                         continue;
                     }
                     else if (lineIn[0] == 'v')
@@ -73,7 +86,7 @@ public class VisualizerEngine : MonoBehaviour
                         Debug.Log("conf: " + positioning[3]);
                         conf = float.Parse(positioning[3]);
 
-                        instantiateVisPoint(x, y, z, conf);
+                        createVisPoint(x, y, z, conf, currGroupNum);
                     }
 
                     curLineNo++;
@@ -85,25 +98,23 @@ public class VisualizerEngine : MonoBehaviour
             Debug.LogError("File Read Error:");
             Debug.LogError(e.Message);
         }
-
-
-        if (currGroupNum >= 0)
-        {
-            groupColors = new Color[currGroupNum];
-            for (int i = 0; i < groupColors.Length; i++)
-            {
-                groupColors[i] = UnityEngine.Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
-            }
-        }
-
-        // colors all the points appropriately
-        finalizeVisPoints();
     }
 
-
-    private void instantiateVisPoint(float x, float y, float z)
+    public void changeColorMode()
     {
-        //TODO: Implementation
+        foreach (GameObject visPointGameObj in createdPoints)
+        {
+            visPointGameObj.GetComponent<VizualizerPoint>().changeColorMode();
+        }
+    }
+
+    // Note: now I am applying the coloring at the same time as creation
+    private void createVisPoint(float x, float y, float z, float conf, int groupNum)
+    {
+        GameObject visPointGameObj = Instantiate(pointPrefab);
+        visPointGameObj.transform.position = new Vector3(x, y, z);
+        visPointGameObj.GetComponent<VizualizerPoint>().initialize(groupColors[groupNum], conf, groupNum);
+        createdPoints.Add(visPointGameObj);
     }
 
     // ignore metadata, blank, and definition lines...
@@ -111,23 +122,9 @@ public class VisualizerEngine : MonoBehaviour
     {
         return lineNo <= NUM_METADATA_LINES || line.Substring(0, 6).Equals("mtllib") || line.Length <= 0;
     }
-
-    public void finalizeVisPoints()
-    {
-        //TODO: Implementation
-        // calls my fancy initialize on the instantiated points
-
-        // default to confidence for now
-        // pointVisualizer.initialize(groupColors[groupnum], confidence, groupnum);
-    }
-
-    private void drawPoint(int groupnum, float confidence)
-    {
-        // (at position)
-        GameObject createdPoint = Instantiate(pointPrefab);
-        VisPoint pointVisualizer = createdPoint.GetComponent<VisPoint>();
-    }
 }
+
+
 
 struct VisPointDataObject
 {
