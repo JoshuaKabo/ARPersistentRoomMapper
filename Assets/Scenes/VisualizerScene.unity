@@ -1014,6 +1014,12 @@ PrefabInstance:
       propertyPath: filePath
       value: Assets/MappedDemos/MappedDemo1.obj
       objectReference: {fileID: 0}
+    - target: {fileID: 3062401801264580470, guid: de1ce151e88b69e45ab6178ab09da2dc,
+        type: 3}
+      propertyPath: groupOrganizerPrefab
+      value: 
+      objectReference: {fileID: 8015230712443486967, guid: 4f7b67da6c9d6d7419cad3234daa0355,
+        type: 3}
     - target: {fileID: 5255775563822441200, guid: de1ce151e88b69e45ab6178ab09da2dc,
         type: 3}
       propertyPath: m_RootOrder
