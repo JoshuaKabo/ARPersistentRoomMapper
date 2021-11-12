@@ -17,6 +17,8 @@ public class VisualizerEngine : MonoBehaviour
 
     private List<Color> groupColors;
 
+    public GameObject groupOrganizerPrefab;
+    private GameObject currentGroupParent;
     public GameObject pointPrefab;
     // read the file
     // each is group num, confidence, and 3 spacial dimensions
@@ -67,6 +69,11 @@ public class VisualizerEngine : MonoBehaviour
                     {
                         currGroupNum++;
                         groupColors[currGroupNum] = UnityEngine.Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
+
+                        // WARNING: Rotation of points may be altered by the parent's initial rotation
+                        currentGroupParent = Instantiate(groupOrganizerPrefab);
+                        currentGroupParent.name = "Point Group " + currGroupNum;
+
                         continue;
                     }
                     else if (lineIn[0] == 'v')
@@ -113,6 +120,8 @@ public class VisualizerEngine : MonoBehaviour
     {
         GameObject visPointGameObj = Instantiate(pointPrefab);
         visPointGameObj.transform.position = new Vector3(x, y, z);
+        // for group organization (hopefully this doesn't alter position)
+        visPointGameObj.transform.parent = currentGroupParent.transform;
         visPointGameObj.GetComponent<VizualizerPoint>().initialize(groupColors[groupNum], conf, groupNum);
         createdPoints.Add(visPointGameObj);
     }
