@@ -32,6 +32,12 @@ public class VisualizerEngine : MonoBehaviour
 
     private const int NUM_METADATA_LINES = 3;
 
+    private void Start()
+    {
+        groupColors = new List<Color>();
+        createdPoints = new List<GameObject>();
+    }
+
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.R))
@@ -47,6 +53,9 @@ public class VisualizerEngine : MonoBehaviour
 
     public void readData()
     {
+
+        Debug.Log("reading: " + filePath);
+
         int curLineNo = 0;
         try
         {
@@ -56,12 +65,13 @@ public class VisualizerEngine : MonoBehaviour
 
                 while ((lineIn = streamReader.ReadLine()) != null)
                 {
+                    Debug.Log("line: " + lineIn);
                     lineIn = lineIn.Trim();
                     lineIn = lineIn.ToLower();
 
                     if (shouldSkipLine(lineIn, curLineNo))
                     {
-                        continue;
+                        // continue;
                     }
                     // TODO: test if char comparison plays nicely with == here
                     // this is a new object, meaning it's part of a fresh group
@@ -74,11 +84,13 @@ public class VisualizerEngine : MonoBehaviour
                         currentGroupParent = Instantiate(groupOrganizerPrefab);
                         currentGroupParent.name = "Point Group " + currGroupNum;
 
-                        continue;
+                        // continue;
                     }
-                    else if (lineIn[0] == 'v')
+                    else if (lineIn.Length > 0 && lineIn[0] == 'v')
                     {
                         // NOTE (Much later): bake actual geometry into the production models, don't rebuild geo each time
+
+                        Debug.Log("In branch to read a line");
 
                         string[] positioning = lineIn.Split(' ');
 
@@ -118,6 +130,7 @@ public class VisualizerEngine : MonoBehaviour
     // Note: now I am applying the coloring at the same time as creation
     private void createVisPoint(float x, float y, float z, float conf, int groupNum)
     {
+        Debug.Log("instantiating a pt");
         GameObject visPointGameObj = Instantiate(pointPrefab);
         visPointGameObj.transform.position = new Vector3(x, y, z);
         // for group organization (hopefully this doesn't alter position)
@@ -129,7 +142,7 @@ public class VisualizerEngine : MonoBehaviour
     // ignore metadata, blank, and definition lines...
     private bool shouldSkipLine(string line, int lineNo)
     {
-        return lineNo <= NUM_METADATA_LINES || line.Substring(0, 6).Equals("mtllib") || line.Length <= 0;
+        return lineNo <= NUM_METADATA_LINES || line.Substring(0, 6).Equals("mtllib") || line.Length <= 0 || line[0] == '#';
     }
 }
 

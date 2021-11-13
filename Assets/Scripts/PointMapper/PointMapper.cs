@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR.ARFoundation;
 using System.IO;
+using UnityEngine.Android;
 
 /*
     Pack mule to carry all point mapping functionality for inheritance
@@ -38,13 +39,23 @@ public class PointMapper : MonoBehaviour
 
     public void writeToObj()
     {
+        // ends up in Pixel 2 XL\Internal shared storage\Android\data\com.DefaultCompany.ARMappingTool\files
         // https://github.com/HookJabs/CS240_3DRenderer/blob/master/crystals.obj
         // https://answers.unity.com/questions/539339/saving-data-in-to-files-android.html
 
+        // fileDebug.text = "Requests permission here where necessary";
 
-        // ends up in Pixel 2 XL\Internal shared storage\Android\data\com.DefaultCompany.ARMappingTool\files
-        string fileName = "pointmapping" + System.DateTime.Now + ".obj";
+        // Get to the right file iteration (version 1 2 3, etc)
+        int currentIteration = 0;
+        string fileName = "pointmapping" + currentIteration + ".obj";
         string filePath = Application.persistentDataPath + "/" + fileName;
+        while (File.Exists(filePath))
+        {
+            currentIteration += 1;
+            fileName = "pointmapping" + currentIteration + ".obj";
+            filePath = Application.persistentDataPath + "/" + fileName;
+        }
+
 
         try
         {
@@ -70,7 +81,7 @@ public class PointMapper : MonoBehaviour
         }
         catch (System.Exception e)
         {
-            fileDebug.text = "Write to file threw an error.";
+            fileDebug.text = "Write to file threw " + e.Data;
             Debug.Log(e);
         }
     }
@@ -90,14 +101,17 @@ public class PointMapper : MonoBehaviour
     // delete all points
     public void Wipe()
     {
-        for (int i = 0; i < visuallyMarkedPoints.Count; i++)
+        if (visuallyMarkedPoints != null)
         {
-            GameObject toDelete = visuallyMarkedPoints[i];
-            Destroy(toDelete);
-        }
-        visuallyMarkedPoints.Clear();
+            for (int i = 0; i < visuallyMarkedPoints.Count; i++)
+            {
+                GameObject toDelete = visuallyMarkedPoints[i];
+                Destroy(toDelete);
+            }
+            visuallyMarkedPoints.Clear();
 
-        pointsForObj.Clear();
+            pointsForObj.Clear();
+        }
     }
 
     public void setConf(float val)
