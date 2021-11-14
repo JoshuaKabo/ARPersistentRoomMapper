@@ -3,6 +3,23 @@ using UnityEngine.XR.ARFoundation;
 
 /*
     The idea is that ALL mapper just grabs everything (maybe even duplicates?), while EVENT mapper might make corrections
+
+    =========__LOGS__=========
+
+    ~~~~~quickupdownstarrs.11.13.21 (13mb, 337,000 pts, 0.6534375 conf)~~~~~
+
+    The good:   
+    is promising, shows the livingroom, stairs, and upstairs prominently
+
+    The Bad:    
+    there are way too many points, and a lot of duplicates.
+    also there seem to be some points that drift out in space...
+
+    Conclusion:
+    I hope that event mapper will grab fewer dupes. If not, I'll come up with a space partitioning algorithm.
+    I should run more analysis on the points to determine how to optimize them, starting w/ dupe elimination.
+    
+    
 */
 
 public class PointALLMapper : PointMapper
@@ -36,7 +53,7 @@ public class PointALLMapper : PointMapper
                     pointCloud.confidenceValues;
 
                 // marks points at high enough confidence
-                selectivelyMarkPoints(confidences, positions);
+                selectivelyMarkPoints(confidences, positions, necessaryConfidenceAmt);
 
             }
             else

@@ -72,7 +72,7 @@ public class PointEVENTMapper : PointMapper
                     pointCloud.confidenceValues;
 
                 // marks points at high enough confidence
-                selectivelyMarkPoints(confidences, positions);
+                selectivelyMarkPoints(confidences, positions, necessaryConfidenceAmt);
 
             }
             else

@@ -4,11 +4,9 @@ using UnityEngine;
 
 public class BillboardSprite : MonoBehaviour
 {
-    public static Camera mainCam;
-
     private void LateUpdate()
     {
         // end of frame, orient same as cam
-        transform.forward = mainCam.transform.forward;
+        transform.forward = Camera.main.transform.forward;
     }
 }

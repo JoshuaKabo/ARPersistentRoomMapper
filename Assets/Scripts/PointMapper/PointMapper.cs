@@ -28,6 +28,10 @@ public class PointMapper : MonoBehaviour
     protected float mappingInitTime;
 
 
+    public Text foundconf;
+    public Text threshdebug;
+
+
     protected void Start()
     {
         visuallyMarkedPoints = new List<GameObject>();
@@ -81,14 +85,9 @@ public class PointMapper : MonoBehaviour
         }
         catch (System.Exception e)
         {
-            fileDebug.text = "Write to file threw " + e.Data;
+            fileDebug.text = "Write to file threw " + e.Message;
             Debug.Log(e);
         }
-    }
-
-    protected void markPointForObj(Vector3 point)
-    {
-        pointsForObj.Add(point);
     }
 
     protected void markPointVisually(Vector3[] positions, int i)
@@ -125,15 +124,18 @@ public class PointMapper : MonoBehaviour
 
     // Note, some code above this call is reused.
     // This function is definitely generic between the two mappers. Logic above may be different between the two.
-    protected void selectivelyMarkPoints(Unity.Collections.NativeArray<float> confidences, Vector3[] positions)
+    protected void selectivelyMarkPoints(Unity.Collections.NativeArray<float> confidences, Vector3[] positions, float threshold)
     {
+        // threshdebug.text = "thresh " + threshold;
         // select and spawn at suitable points
         for (int i = 0; i < confidences.Length; i++)
         {
-            if (confidences[i] >= necessaryConfidenceAmt)
+            if (confidences[i] >= threshold)
             {
+                // foundconf.text = "foundconf " + confidences[i];
+
                 // markPointVisually(positions, i);
-                markPointForObj(new Vector4(positions[i].x, positions[i].y, positions[i].z, confidences[i]));
+                pointsForObj.Add(new Vector4(positions[i].x, positions[i].y, positions[i].z, confidences[i]));
             }
         }
     }

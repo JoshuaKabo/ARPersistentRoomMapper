@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class VizualizerPoint : MonoBehaviour
+public class VisualizerPoint : MonoBehaviour
 {
     public SpriteRenderer sprite;
 
@@ -13,11 +13,11 @@ public class VizualizerPoint : MonoBehaviour
 
     public Colormode displayMode = Colormode.confidence;
 
-    public Color groupColor;
-    public Color confidenceColor;
+    private Color groupColor;
+    private Color confidenceColor;
 
-    public float confidence;
-    public int group;
+    private float confidence;
+    private int group;
 
     private void Start()
     {

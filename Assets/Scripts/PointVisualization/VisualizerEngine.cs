@@ -13,7 +13,7 @@ using UnityEngine;
 public class VisualizerEngine : MonoBehaviour
 {
 
-    public string filePath = "Assets/MappedDemos/MappedDemo1.obj";
+    public string filePath = "Assets/MappedDemos/pointmapping0.obj";
 
     private List<Color> groupColors;
 
@@ -65,45 +65,44 @@ public class VisualizerEngine : MonoBehaviour
 
                 while ((lineIn = streamReader.ReadLine()) != null)
                 {
-                    Debug.Log("line: " + lineIn);
+                    // Debug.Log("line: " + lineIn);
                     lineIn = lineIn.Trim();
                     lineIn = lineIn.ToLower();
 
-                    if (shouldSkipLine(lineIn, curLineNo))
-                    {
-                        // continue;
-                    }
+                    // if (shouldSkipLine(lineIn, curLineNo)) { }
                     // TODO: test if char comparison plays nicely with == here
                     // this is a new object, meaning it's part of a fresh group
-                    else if (lineIn[0] == 'o')
+                    if (lineIn.Length > 0 && lineIn[0] == 'o')
                     {
+                        // Debug.Log("In branch to make a group");
+
                         currGroupNum++;
-                        groupColors[currGroupNum] = UnityEngine.Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
+                        groupColors.Add(UnityEngine.Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f));
 
                         // WARNING: Rotation of points may be altered by the parent's initial rotation
                         currentGroupParent = Instantiate(groupOrganizerPrefab);
                         currentGroupParent.name = "Point Group " + currGroupNum;
 
-                        // continue;
                     }
                     else if (lineIn.Length > 0 && lineIn[0] == 'v')
                     {
                         // NOTE (Much later): bake actual geometry into the production models, don't rebuild geo each time
 
-                        Debug.Log("In branch to read a line");
+                        // Debug.Log("In branch to read a line");
 
                         string[] positioning = lineIn.Split(' ');
 
                         float x, y, z, conf;
 
-                        Debug.Log("x: " + positioning[0]);
-                        x = float.Parse(positioning[0]);
-                        Debug.Log("y: " + positioning[1]);
-                        y = float.Parse(positioning[1]);
-                        Debug.Log("z: " + positioning[2]);
-                        z = float.Parse(positioning[2]);
-                        Debug.Log("conf: " + positioning[3]);
-                        conf = float.Parse(positioning[3]);
+                        // 1 offset to ignore the 'v'
+                        // Debug.Log("x: " + positioning[0 + 1]);
+                        x = float.Parse(positioning[0 + 1]);
+                        // Debug.Log("y: " + positioning[1 + 1]);
+                        y = float.Parse(positioning[1 + 1]);
+                        // Debug.Log("z: " + positioning[2 + 1]);
+                        z = float.Parse(positioning[2 + 1]);
+                        // Debug.Log("conf: " + positioning[3 + 1]);
+                        conf = float.Parse(positioning[3 + 1]);
 
                         createVisPoint(x, y, z, conf, currGroupNum);
                     }
@@ -123,7 +122,7 @@ public class VisualizerEngine : MonoBehaviour
     {
         foreach (GameObject visPointGameObj in createdPoints)
         {
-            visPointGameObj.GetComponent<VizualizerPoint>().changeColorMode();
+            visPointGameObj.GetComponent<VisualizerPoint>().changeColorMode();
         }
     }
 
@@ -135,15 +134,15 @@ public class VisualizerEngine : MonoBehaviour
         visPointGameObj.transform.position = new Vector3(x, y, z);
         // for group organization (hopefully this doesn't alter position)
         visPointGameObj.transform.parent = currentGroupParent.transform;
-        visPointGameObj.GetComponent<VizualizerPoint>().initialize(groupColors[groupNum], conf, groupNum);
+        visPointGameObj.GetComponent<VisualizerPoint>().initialize(groupColors[groupNum], conf, groupNum);
         createdPoints.Add(visPointGameObj);
     }
 
     // ignore metadata, blank, and definition lines...
-    private bool shouldSkipLine(string line, int lineNo)
-    {
-        return lineNo <= NUM_METADATA_LINES || line.Substring(0, 6).Equals("mtllib") || line.Length <= 0 || line[0] == '#';
-    }
+    // private bool shouldSkipLine(string line, int lineNo)
+    // {
+    //     return lineNo <= NUM_METADATA_LINES || line.Substring(0, 6).Equals("mtllib") || line.Length <= 0 || line[0] == '#';
+    // }
 }
 
 

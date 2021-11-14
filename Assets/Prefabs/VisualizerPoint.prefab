@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8763531036464231863}
   - component: {fileID: 5556966175074467612}
   - component: {fileID: 4616244918499209103}
-  - component: {fileID: 6066960611471741502}
+  - component: {fileID: 645505250709044866}
   m_Layer: 0
   m_Name: VisualizerPoint
   m_TagString: Untagged
@@ -28,7 +28,8 @@ Transform:
   m_GameObject: {fileID: 7285087454622922924}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 1299.0007, y: 217.19974, z: 365.19464}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -97,7 +98,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8ff1336c7ec63042a405e6558462236, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &6066960611471741502
+--- !u!114 &645505250709044866
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -109,9 +110,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47f82016f54f9744d8c63f6158790c02, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sprite: {fileID: 0}
-  displayMode: 0
-  groupColor: {r: 0, g: 0, b: 0, a: 0}
-  confidenceColor: {r: 0, g: 0, b: 0, a: 0}
-  confidence: 0
-  group: 0
+  sprite: {fileID: 5556966175074467612}
+  displayMode: 1
