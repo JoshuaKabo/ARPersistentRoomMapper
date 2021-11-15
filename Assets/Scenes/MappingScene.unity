@@ -503,6 +503,7 @@ GameObject:
   - component: {fileID: 388525033}
   - component: {fileID: 388525032}
   - component: {fileID: 388525036}
+  - component: {fileID: 388525039}
   m_Layer: 0
   m_Name: AR Session Origin
   m_TagString: Untagged
@@ -561,14 +562,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 388525029}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9b04c44096696da4a82e1100f535f1fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   pointCloudManager: {fileID: 388525038}
   necessaryConfidenceAmt: 0.9
-  marker: {fileID: 4693931478075898448, guid: fe35bdf57cc35f343817475851e1c3de, type: 3}
+  marker: {fileID: 7285087454622922924, guid: b13821cca2fe9374e9c07ec3efed6f9c, type: 3}
   debugText: {fileID: 80607618}
   confDebug: {fileID: 402831683}
   fileDebug: {fileID: 1900782794}
@@ -627,6 +628,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_PointCloudPrefab: {fileID: 7759750119856982188, guid: e04a4125bb8e52841b93ab4089ab4895,
     type: 3}
+--- !u!114 &388525039
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 388525029}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b0eff13b13f2e04292ff4afddcb2893, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pointCloudManager: {fileID: 388525038}
+  necessaryConfidenceAmt: 0.9
+  marker: {fileID: 7285087454622922924, guid: b13821cca2fe9374e9c07ec3efed6f9c, type: 3}
+  debugText: {fileID: 80607618}
+  confDebug: {fileID: 402831683}
+  fileDebug: {fileID: 1900782794}
+  foundconf: {fileID: 510626256}
+  threshdebug: {fileID: 641673773}
+  cloudsTracked: []
 --- !u!1 &402831681
 GameObject:
   m_ObjectHideFlags: 0

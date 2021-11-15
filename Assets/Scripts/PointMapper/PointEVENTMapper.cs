@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
+using System.IO;
+
 
 /*
 TODO: The keys to look for in the event mapper vs the all mapper:
@@ -49,6 +51,11 @@ public class PointEVENTMapper : PointMapper
         pointCloudManager.pointCloudsChanged += ctx => trackPointCloud(ctx.added, ctx.updated);
     }
 
+    /*
+    TODO: determine how often updates are mapped,
+    determine if I can compare original to update w/ pointer comparison
+    */
+
     private void trackPointCloud(List<ARPointCloud> added, List<ARPointCloud> updated)
     {
         // be sure to create new copies of those tracked, so they don't get deleted.
@@ -68,7 +75,7 @@ public class PointEVENTMapper : PointMapper
 
     private void cloudsToPoints()
     {
-        foreach (ARPointCloud pointCloud in pointCloudManager.trackables)
+        foreach (ARPointCloud pointCloud in cloudsTracked)
         {
             // Do something with the ARPointCloud
             // null check first
@@ -83,8 +90,6 @@ public class PointEVENTMapper : PointMapper
                     pointCloud.positions
                     ).Length;
 
-                debugText.text = cloudSize + " Points found in cloud!";
-
                 Vector3[] positions = new Vector3[cloudSize];
 
                 ((Unity.Collections.NativeSlice<Vector3>)pointCloud.positions)
@@ -98,10 +103,108 @@ public class PointEVENTMapper : PointMapper
                 selectivelyMarkPoints(confidences, positions, necessaryConfidenceAmt);
 
             }
-            else
+        }
+    }
+
+    protected override void selectivelyMarkPoints(Unity.Collections.NativeArray<float> confidences, Vector3[] positions, float threshold)
+    {
+        // threshdebug.text = "thresh " + threshold;
+        // select and spawn at suitable points
+        for (int i = 0; i < confidences.Length; i++)
+        {
+            if (confidences[i] >= threshold)
             {
-                debugText.text = "No Points in cloud...";
+                // foundconf.text = "foundconf " + confidences[i];
+
+                // markPointVisually(positions, i);
+                pointsForObj.Add(new Vector4(positions[i].x, positions[i].y, positions[i].z, confidences[i]));
             }
         }
     }
+
+
+    /*
+    Difference w/ event will be that it will write all those clouds it grabbed
+    */
+    public override void writeToObj()
+    {
+        // ends up in Pixel 2 XL\Internal shared storage\Android\data\com.DefaultCompany.ARMappingTool\files
+        // https://github.com/HookJabs/CS240_3DRenderer/blob/master/crystals.obj
+        // https://answers.unity.com/questions/539339/saving-data-in-to-files-android.html
+
+        // fileDebug.text = "Requests permission here where necessary";
+
+
+        string filePath = findFreshPath();
+
+        int groupNum = -1;
+
+
+        try
+        {
+            // TODO: add confidence values into the obj file. I can then color particles based on conf
+            //       in my own visualizer.
+            float timeSinceRecording = Time.time - mappingInitTime;
+            // string[] objLines = new string[pointsForObj.Count + 5];
+            List<string> objLines = new List<string>();
+            objLines.Add("# ARZombieMapper vertex obj output (ALL POINTS, no event used.)");
+            objLines.Add("# Confidence threshold: " + necessaryConfidenceAmt);
+            objLines.Add("# Time spent collecting data: " + timeSinceRecording);
+            objLines.Add("mtllib pointmapping.mtl");
+
+            int currLineNum = 4;
+
+            foreach (ARPointCloud pointCloud in cloudsTracked)
+            {
+                if (
+    pointCloud.positions != null &&
+    pointCloud.confidenceValues != null
+)
+                {
+                    int cloudSize =
+                        (
+                        (Unity.Collections.NativeSlice<Vector3>)
+                        pointCloud.positions
+                        ).Length;
+
+                    Vector3[] positions = new Vector3[cloudSize];
+
+                    ((Unity.Collections.NativeSlice<Vector3>)pointCloud.positions)
+                        .CopyTo(positions);
+
+                    Unity.Collections.NativeArray<float> confidences =
+                        (Unity.Collections.NativeArray<float>)
+                        pointCloud.confidenceValues;
+
+                    /*
+                    In here, declare the group, then write out each point
+                    */
+
+                    objLines.Add("o PtMappingG" + groupNum);
+
+                    /*
+                    TODO: here's the inner loop, all points in the cloud...
+                    */
+                    // for (int index = 0; index < pointsForObj.Count; index++)
+                    // {
+                    //     Vector4 currentPoint = pointsForObj[index];
+                    //     // prepare x, y, z, then confidence
+                    //     objLines[index + 5] = "v " + currentPoint.x + ' ' + currentPoint.y + ' ' + currentPoint.z + ' ' + currentPoint.w;
+                    // }
+
+                }
+
+            }
+
+
+            File.WriteAllLines(filePath, objLines);
+            fileDebug.text = objLines.Count + " Lines written successfully!";
+        }
+        catch (System.Exception e)
+        {
+            fileDebug.text = "Write to file threw " + e.Message;
+            Debug.Log(e);
+        }
+    }
+
 }

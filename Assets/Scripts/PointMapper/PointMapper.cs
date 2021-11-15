@@ -41,25 +41,13 @@ public class PointMapper : MonoBehaviour
     }
 
 
-    public void writeToObj()
+    public virtual void writeToObj()
     {
         // ends up in Pixel 2 XL\Internal shared storage\Android\data\com.DefaultCompany.ARMappingTool\files
         // https://github.com/HookJabs/CS240_3DRenderer/blob/master/crystals.obj
         // https://answers.unity.com/questions/539339/saving-data-in-to-files-android.html
 
-        // fileDebug.text = "Requests permission here where necessary";
-
-        // Get to the right file iteration (version 1 2 3, etc)
-        int currentIteration = 0;
-        string fileName = "pointmapping" + currentIteration + ".obj";
-        string filePath = Application.persistentDataPath + "/" + fileName;
-        while (File.Exists(filePath))
-        {
-            currentIteration += 1;
-            fileName = "pointmapping" + currentIteration + ".obj";
-            filePath = Application.persistentDataPath + "/" + fileName;
-        }
-
+        string filePath = findFreshPath();
 
         try
         {
@@ -124,7 +112,7 @@ public class PointMapper : MonoBehaviour
 
     // Note, some code above this call is reused.
     // This function is definitely generic between the two mappers. Logic above may be different between the two.
-    protected void selectivelyMarkPoints(Unity.Collections.NativeArray<float> confidences, Vector3[] positions, float threshold)
+    protected virtual void selectivelyMarkPoints(Unity.Collections.NativeArray<float> confidences, Vector3[] positions, float threshold)
     {
         // threshdebug.text = "thresh " + threshold;
         // select and spawn at suitable points
@@ -138,6 +126,23 @@ public class PointMapper : MonoBehaviour
                 pointsForObj.Add(new Vector4(positions[i].x, positions[i].y, positions[i].z, confidences[i]));
             }
         }
+    }
+
+
+    public string findFreshPath()
+    {
+        // Get to the right file iteration (version 1 2 3, etc)
+        int currentIteration = 0;
+        string fileName = "pointmapping" + currentIteration + ".obj";
+        string filePath = Application.persistentDataPath + "/" + fileName;
+        while (File.Exists(filePath))
+        {
+            currentIteration += 1;
+            fileName = "pointmapping" + currentIteration + ".obj";
+            filePath = Application.persistentDataPath + "/" + fileName;
+        }
+
+        return filePath;
     }
 
 
