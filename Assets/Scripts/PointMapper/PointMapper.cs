@@ -8,6 +8,7 @@ using UnityEngine.Android;
 
 /*
     Pack mule to carry all point mapping functionality for inheritance
+    TODO: Remember to request permissions nicely
 */
 
 public class PointMapper : MonoBehaviour
@@ -28,11 +29,7 @@ public class PointMapper : MonoBehaviour
     protected float mappingInitTime;
 
 
-    public Text foundconf;
-    public Text threshdebug;
-
-
-    protected void Start()
+    protected virtual void Start()
     {
         visuallyMarkedPoints = new List<GameObject>();
         pointsForObj = new List<Vector4>();

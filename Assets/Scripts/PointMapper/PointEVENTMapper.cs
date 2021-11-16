@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 using System.IO;
-
+using UnityEngine.UI;
 
 /*
 TODO: The keys to look for in the event mapper vs the all mapper:
@@ -44,19 +44,29 @@ Computer stereo vision
 
 public class PointEVENTMapper : PointMapper
 {
-    public List<ARPointCloud> cloudsTracked;
-
-    private void Awake()
-    {
-        pointCloudManager.pointCloudsChanged += ctx => trackPointCloud(ctx.added, ctx.updated);
-    }
-
     /*
     TODO: determine how often updates are mapped,
     determine if I can compare original to update w/ pointer comparison
     */
 
-    private void trackPointCloud(List<ARPointCloud> added, List<ARPointCloud> updated)
+    public Text cloudsTrackedDebug;
+    public List<ARPointCloud> cloudsTracked;
+
+    private void Awake()
+    {
+        pointCloudManager.pointCloudsChanged += ctx => trackPointCloud(ctx.added, ctx.updated, ctx.removed);
+    }
+
+    protected override void Start()
+    {
+        cloudsTracked = new List<ARPointCloud>();
+        visuallyMarkedPoints = new List<GameObject>();
+        pointsForObj = new List<Vector4>();
+        confDebug.text = "conf: " + necessaryConfidenceAmt;
+        mappingInitTime = Time.time;
+    }
+
+    private void trackPointCloud(List<ARPointCloud> added, List<ARPointCloud> updated, List<ARPointCloud> removed)
     {
         // be sure to create new copies of those tracked, so they don't get deleted.
         // note - each plane has it's own subsumed by getter.
@@ -65,11 +75,29 @@ public class PointEVENTMapper : PointMapper
         // ALSO, see if moving to a fresh room wipes all I tracked
 
 
+        /*
+        foreach (ARPointCloud cloud in removed)
+        {
+            MAYBE IT WAS REMOVED BECAUSE IT WAS REPLACED W/ SOMETHING BETTER
+            (...most likely it was removed because not in focus anymore...)
+        }
+        */
+
+        /*
+        foreach (ARPointCloud cloud in added)
+        {
+            if(in tracked)
+                display debug message, replace the original
+        }
+        */
+
+
         foreach (ARPointCloud cloud in added)
         {
             // this, naievely, assumes that the updates will be reflected, and removed planes will stay in my own tracker 
             // (I want them to stay).
             cloudsTracked.Add(cloud);
+            cloudsTrackedDebug.text = "Clouds Tracked:" + cloudsTracked.Count;
         }
     }
 
@@ -174,8 +202,11 @@ public class PointEVENTMapper : PointMapper
 
                     for (int index = 0; index < confidences.Length; index++)
                     {
-                        // prepare x, y, z, then confidence
-                        objLines.Add("v " + positions[index].x + ' ' + positions[index].y + ' ' + positions[index].z + ' ' + confidences[index]);
+                        if (confidences[index] > necessaryConfidenceAmt)
+                        {
+                            // prepare x, y, z, then confidence
+                            objLines.Add("v " + positions[index].x + ' ' + positions[index].y + ' ' + positions[index].z + ' ' + confidences[index]);
+                        }
                     }
 
                 }
