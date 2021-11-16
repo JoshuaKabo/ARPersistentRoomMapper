@@ -114,9 +114,6 @@ public class PointEVENTMapper : PointMapper
         {
             if (confidences[i] >= threshold)
             {
-                // foundconf.text = "foundconf " + confidences[i];
-
-                // markPointVisually(positions, i);
                 pointsForObj.Add(new Vector4(positions[i].x, positions[i].y, positions[i].z, confidences[i]));
             }
         }
@@ -142,17 +139,12 @@ public class PointEVENTMapper : PointMapper
 
         try
         {
-            // TODO: add confidence values into the obj file. I can then color particles based on conf
-            //       in my own visualizer.
             float timeSinceRecording = Time.time - mappingInitTime;
-            // string[] objLines = new string[pointsForObj.Count + 5];
             List<string> objLines = new List<string>();
             objLines.Add("# ARZombieMapper vertex obj output (ALL POINTS, no event used.)");
             objLines.Add("# Confidence threshold: " + necessaryConfidenceAmt);
             objLines.Add("# Time spent collecting data: " + timeSinceRecording);
             objLines.Add("mtllib pointmapping.mtl");
-
-            int currLineNum = 4;
 
             foreach (ARPointCloud pointCloud in cloudsTracked)
             {
@@ -169,28 +161,22 @@ public class PointEVENTMapper : PointMapper
 
                     Vector3[] positions = new Vector3[cloudSize];
 
+                    // save the positions to a native slice of V3s
                     ((Unity.Collections.NativeSlice<Vector3>)pointCloud.positions)
                         .CopyTo(positions);
 
+                    // save the confs to a native array of floats
                     Unity.Collections.NativeArray<float> confidences =
                         (Unity.Collections.NativeArray<float>)
                         pointCloud.confidenceValues;
 
-                    /*
-                    In here, declare the group, then write out each point
-                    */
-
                     objLines.Add("o PtMappingG" + groupNum);
 
-                    /*
-                    TODO: here's the inner loop, all points in the cloud...
-                    */
-                    // for (int index = 0; index < pointsForObj.Count; index++)
-                    // {
-                    //     Vector4 currentPoint = pointsForObj[index];
-                    //     // prepare x, y, z, then confidence
-                    //     objLines[index + 5] = "v " + currentPoint.x + ' ' + currentPoint.y + ' ' + currentPoint.z + ' ' + currentPoint.w;
-                    // }
+                    for (int index = 0; index < confidences.Length; index++)
+                    {
+                        // prepare x, y, z, then confidence
+                        objLines.Add("v " + positions[index].x + ' ' + positions[index].y + ' ' + positions[index].z + ' ' + confidences[index]);
+                    }
 
                 }
 
