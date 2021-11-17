@@ -42,6 +42,12 @@ rangefinding, situational awareness
 Computer stereo vision
 */
 
+
+/*
+TODO 11/17
+Get the number of points in these clouds
+*/
+
 public class PointEVENTMapper : PointMapper
 {
     /*
@@ -94,59 +100,13 @@ public class PointEVENTMapper : PointMapper
 
         foreach (ARPointCloud cloud in added)
         {
+            Debug.Log("cloudAdded");
             // this, naievely, assumes that the updates will be reflected, and removed planes will stay in my own tracker 
             // (I want them to stay).
             cloudsTracked.Add(cloud);
             cloudsTrackedDebug.text = "Clouds Tracked:" + cloudsTracked.Count;
         }
     }
-
-    private void cloudsToPoints()
-    {
-        foreach (ARPointCloud pointCloud in cloudsTracked)
-        {
-            // Do something with the ARPointCloud
-            // null check first
-            if (
-                pointCloud.positions != null &&
-                pointCloud.confidenceValues != null
-            )
-            {
-                int cloudSize =
-                    (
-                    (Unity.Collections.NativeSlice<Vector3>)
-                    pointCloud.positions
-                    ).Length;
-
-                Vector3[] positions = new Vector3[cloudSize];
-
-                ((Unity.Collections.NativeSlice<Vector3>)pointCloud.positions)
-                    .CopyTo(positions);
-
-                Unity.Collections.NativeArray<float> confidences =
-                    (Unity.Collections.NativeArray<float>)
-                    pointCloud.confidenceValues;
-
-                // marks points at high enough confidence
-                selectivelyMarkPoints(confidences, positions, necessaryConfidenceAmt);
-
-            }
-        }
-    }
-
-    protected override void selectivelyMarkPoints(Unity.Collections.NativeArray<float> confidences, Vector3[] positions, float threshold)
-    {
-        // threshdebug.text = "thresh " + threshold;
-        // select and spawn at suitable points
-        for (int i = 0; i < confidences.Length; i++)
-        {
-            if (confidences[i] >= threshold)
-            {
-                pointsForObj.Add(new Vector4(positions[i].x, positions[i].y, positions[i].z, confidences[i]));
-            }
-        }
-    }
-
 
     /*
     Difference w/ event will be that it will write all those clouds it grabbed
@@ -164,7 +124,6 @@ public class PointEVENTMapper : PointMapper
 
         int groupNum = -1;
 
-
         try
         {
             float timeSinceRecording = Time.time - mappingInitTime;
@@ -174,12 +133,15 @@ public class PointEVENTMapper : PointMapper
             objLines.Add("# Time spent collecting data: " + timeSinceRecording);
             objLines.Add("mtllib pointmapping.mtl");
 
+
             foreach (ARPointCloud pointCloud in cloudsTracked)
             {
+                Debug.Log("mapping a cloud");
+
                 if (
-    pointCloud.positions != null &&
-    pointCloud.confidenceValues != null
-)
+                    pointCloud.positions != null &&
+                    pointCloud.confidenceValues != null
+                )
                 {
                     int cloudSize =
                         (
@@ -204,6 +166,8 @@ public class PointEVENTMapper : PointMapper
                     {
                         if (confidences[index] > necessaryConfidenceAmt)
                         {
+                            Debug.Log("mapping a point");
+
                             // prepare x, y, z, then confidence
                             objLines.Add("v " + positions[index].x + ' ' + positions[index].y + ' ' + positions[index].z + ' ' + confidences[index]);
                         }
