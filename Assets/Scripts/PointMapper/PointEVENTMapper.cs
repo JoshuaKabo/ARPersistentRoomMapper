@@ -69,7 +69,7 @@ public class PointEVENTMapper : PointMapper
         // https://github.com/HookJabs/CS240_3DRenderer/blob/master/crystals.obj
         // https://answers.unity.com/questions/539339/saving-data-in-to-files-android.html
 
-        // fileDebug.text = "Requests permission here where necessary";
+        // Request permission here where necessary
 
 
         string filePath = findFreshPath();
@@ -78,7 +78,6 @@ public class PointEVENTMapper : PointMapper
 
         try
         {
-            int writeIndex = 0;
             int prevGroupNum = -1;
             float timeSinceRecording = Time.time - mappingInitTime;
             // use a list because unsure of number of groups
@@ -88,38 +87,18 @@ public class PointEVENTMapper : PointMapper
             objLines.Add("# Time spent collecting data: " + timeSinceRecording);
             objLines.Add("mtllib pointmapping.mtl");
 
-            // TODO: Set up grouping, fix this code
-
             for (int i = 0; i < trackedPoints.Count; i++)
             {
-                // Note: assumes group numbers will increase in order
+                // Note/Warning: assumes group numbers will increase in order
                 if (trackedPoints[i].groupnum > prevGroupNum)
                 {
-
+                    prevGroupNum++;
+                    objLines.Add("o PtMappingG" + groupNum);
                 }
 
-                // confidences are thresholded earlier
+                // confidences are thresholded earlier, so I can just grab everything prevetted
                 objLines.Add("v " + trackedPoints[i].x + ' ' + trackedPoints[i].y + ' ' + trackedPoints[i].z + ' ' + trackedPoints[i]);
             }
-
-            foreach (PointDataObject point in trackedPoints)
-            {
-
-                objLines.Add("o PtMappingG" + groupNum);
-
-                for (int index = 0; index < confidences.Length; index++)
-                {
-                    if (confidences[index] > necessaryConfidenceAmt)
-                    {
-                        Debug.Log("mapping a point");
-
-                        // prepare x, y, z, then confidence
-                        objLines.Add("v " + positions[index].x + ' ' + positions[index].y + ' ' + positions[index].z + ' ' + confidences[index]);
-                    }
-                }
-
-            }
-
 
             File.WriteAllLines(filePath, objLines);
             fileDebug.text = objLines.Count + " Lines written successfully!";
