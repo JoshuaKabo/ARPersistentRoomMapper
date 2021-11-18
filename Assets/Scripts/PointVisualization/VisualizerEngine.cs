@@ -24,7 +24,7 @@ public class VisualizerEngine : MonoBehaviour
     // each is group num, confidence, and 3 spacial dimensions
 
     // NOTE: this is memory inefficient, do something better in production
-    private List<VisPointDataObject> uninitializedPoints;
+    private List<PointDataObject> uninitializedPoints;
     private List<GameObject> createdPoints;
 
     // start @ -1 because the first readable line of any of these files will be a fresh object
@@ -147,16 +147,17 @@ public class VisualizerEngine : MonoBehaviour
 
 
 
-struct VisPointDataObject
+public struct PointDataObject
 {
-    // NOTE: not sure where groupnum is to be determined... During reading??
+    // Groupnum should be used for ease of visualization
+    // Maybe for different rooms?
     public int groupnum { get; }
     public float x { get; }
     public float y { get; }
     public float z { get; }
     public float w { get; }
 
-    public VisPointDataObject(int groupnum, float x, float y, float z, float w)
+    public PointDataObject(int groupnum, float x, float y, float z, float w)
     {
         this.groupnum = groupnum;
         this.x = x;
