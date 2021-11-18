@@ -39,7 +39,10 @@ public class PointEVENTMapper : PointMapper
 
         for (int i = 0; i < cloudSize; i++)
         {
-            trackedPoints.Add(new PointDataObject(0, pointsToTrack[i].x, pointsToTrack[i].y, pointsToTrack[i].z, confidencesToTrack[i]));
+            if (confidencesToTrack[i] >= necessaryConfidenceAmt)
+            {
+                trackedPoints.Add(new PointDataObject(0, pointsToTrack[i].x, pointsToTrack[i].y, pointsToTrack[i].z, confidencesToTrack[i]));
+            }
         }
     }
 
@@ -76,33 +79,31 @@ public class PointEVENTMapper : PointMapper
         try
         {
             int writeIndex = 0;
+            int prevGroupNum = -1;
             float timeSinceRecording = Time.time - mappingInitTime;
-            string[] objLines = new string[trackedPoints.Count];
-            objLines[writeIndex++] = "# ARZombieMapper vertex obj output (ALL POINTS, no event used.)";
-            objLines[writeIndex++] = "# Confidence threshold: " + necessaryConfidenceAmt;
-            objLines[writeIndex++] = "# Time spent collecting data: " + timeSinceRecording;
-            objLines[writeIndex++] = "mtllib pointmapping.mtl";
+            // use a list because unsure of number of groups
+            List<string> objLines = new List<string>();
+            objLines.Add("# ARZombieMapper vertex obj output (ALL POINTS, no event used.)");
+            objLines.Add("# Confidence threshold: " + necessaryConfidenceAmt);
+            objLines.Add("# Time spent collecting data: " + timeSinceRecording);
+            objLines.Add("mtllib pointmapping.mtl");
 
             // TODO: Set up grouping, fix this code
 
+            for (int i = 0; i < trackedPoints.Count; i++)
+            {
+                // Note: assumes group numbers will increase in order
+                if (trackedPoints[i].groupnum > prevGroupNum)
+                {
+
+                }
+
+                // confidences are thresholded earlier
+                objLines.Add("v " + trackedPoints[i].x + ' ' + trackedPoints[i].y + ' ' + trackedPoints[i].z + ' ' + trackedPoints[i]);
+            }
+
             foreach (PointDataObject point in trackedPoints)
             {
-                int cloudSize =
-                    (
-                    (Unity.Collections.NativeSlice<Vector3>)
-                    pointCloud.positions
-                    ).Length;
-
-                Vector3[] positions = new Vector3[cloudSize];
-
-                // save the positions to a native slice of V3s
-                ((Unity.Collections.NativeSlice<Vector3>)pointCloud.positions)
-                    .CopyTo(positions);
-
-                // save the confs to a native array of floats
-                Unity.Collections.NativeArray<float> confidences =
-                    (Unity.Collections.NativeArray<float>)
-                    pointCloud.confidenceValues;
 
                 objLines.Add("o PtMappingG" + groupNum);
 
