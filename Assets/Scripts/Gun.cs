@@ -41,7 +41,7 @@ public class Gun : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(muzzle.transform.position, muzzle.transform.forward, out hit, range))
         {
-            EnemyHealth target = hit.transform.GetComponent<EnemyHealth>();
+            HP target = hit.transform.GetComponent<HP>();
             if (target != null)
             {// if that wasn't a wall or something...
                 target.TakeDamage(34f);

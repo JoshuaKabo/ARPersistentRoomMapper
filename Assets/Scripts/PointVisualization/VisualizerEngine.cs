@@ -66,7 +66,7 @@ public class VisualizerEngine : MonoBehaviour
 
                 while ((lineIn = streamReader.ReadLine()) != null)
                 {
-                    Debug.Log("line: " + lineIn);
+                    // Debug.Log("line: " + lineIn);
                     lineIn = lineIn.Trim();
                     lineIn = lineIn.ToLower();
 

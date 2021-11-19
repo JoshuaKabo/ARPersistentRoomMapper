@@ -19,6 +19,9 @@ The new strat:
 ditch all mapper (events are more efficient)
 grab all points from added and updated in my own list (with optimizations applied)
 
+This should all be 1 app
+2 apps makes things confusing and slower
+
 ----------------------------------------------------------------------------------------------
 ========================================   Research   ========================================
 ----------------------------------------------------------------------------------------------
@@ -51,13 +54,18 @@ Computer stereo vision
 
 Blood decals
 Zombies can reach under, over, through objects
+    use of ik
 zombies are culled by real world objects
 dynamic objects will have movement detection
 walls will have a zombie biotic glowing shader
 Figure out game mechanics
 Experiment with viewmodels
+    Game should be portrait
+        landscape is too unwieldly
 ui
 multiplayer lan code (should also share the game file)
+    port choice (advanced settings)
+    could even see about sharing wifi via QR
 
 
 -------------------------------------------------------------------------------------------
