@@ -1,4 +1,10 @@
 ------------------------------------------------------------------------------------------
+========================================   TODO   ========================================
+------------------------------------------------------------------------------------------
+
+Might want to get started on another aspect of this app, like zombies or ui, as a break
+
+------------------------------------------------------------------------------------------
 ========================================   Code   ========================================
 ------------------------------------------------------------------------------------------
 
@@ -38,6 +44,21 @@ might give some insight into my approach, how to use the points, where to edit t
 simultaneous localization and mapping
 rangefinding, situational awareness
 Computer stereo vision
+
+-------------------------------------------------------------------------------------------
+=======================================    Feature List   =================================
+-------------------------------------------------------------------------------------------
+
+Blood decals
+Zombies can reach under, over, through objects
+zombies are culled by real world objects
+dynamic objects will have movement detection
+walls will have a zombie biotic glowing shader
+Figure out game mechanics
+Experiment with viewmodels
+ui
+multiplayer lan code (should also share the game file)
+
 
 -------------------------------------------------------------------------------------------
 =======================================    Tests   ========================================

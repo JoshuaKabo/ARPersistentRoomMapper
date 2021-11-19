@@ -61,11 +61,12 @@ public class VisualizerEngine : MonoBehaviour
         {
             using (System.IO.StreamReader streamReader = new System.IO.StreamReader(filePath))
             {
+                Debug.Log("got into reading");
                 string lineIn;
 
                 while ((lineIn = streamReader.ReadLine()) != null)
                 {
-                    // Debug.Log("line: " + lineIn);
+                    Debug.Log("line: " + lineIn);
                     lineIn = lineIn.Trim();
                     lineIn = lineIn.ToLower();
 

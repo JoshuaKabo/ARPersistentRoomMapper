@@ -9,6 +9,7 @@ using UnityEngine.Android;
 /*
     Pack mule to carry all point mapping functionality for inheritance
     TODO: Remember to request permissions nicely
+    TODO: Turn off rotate
 */
 
 public class PointMapper : MonoBehaviour

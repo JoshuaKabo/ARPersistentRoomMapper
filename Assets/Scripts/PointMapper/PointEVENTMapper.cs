@@ -10,7 +10,6 @@ public class PointEVENTMapper : PointMapper
 
     private List<PointDataObject> trackedPoints;
 
-
     private void Awake()
     {
         pointCloudManager.pointCloudsChanged += ctx => extractNewPoints(ctx.added, ctx.updated);
@@ -74,8 +73,6 @@ public class PointEVENTMapper : PointMapper
 
         string filePath = findFreshPath();
 
-        int groupNum = -1;
-
         try
         {
             int prevGroupNum = -1;
@@ -93,11 +90,11 @@ public class PointEVENTMapper : PointMapper
                 if (trackedPoints[i].groupnum > prevGroupNum)
                 {
                     prevGroupNum++;
-                    objLines.Add("o PtMappingG" + groupNum);
+                    objLines.Add("o PtMappingG" + prevGroupNum);
                 }
 
                 // confidences are thresholded earlier, so I can just grab everything prevetted
-                objLines.Add("v " + trackedPoints[i].x + ' ' + trackedPoints[i].y + ' ' + trackedPoints[i].z + ' ' + trackedPoints[i]);
+                objLines.Add("v " + trackedPoints[i].x + ' ' + trackedPoints[i].y + ' ' + trackedPoints[i].z + ' ' + trackedPoints[i].w);
             }
 
             File.WriteAllLines(filePath, objLines);
