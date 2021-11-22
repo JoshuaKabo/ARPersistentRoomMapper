@@ -84,7 +84,7 @@ public class PointMapper : MonoBehaviour
     }
 
     // delete all points
-    public void Wipe()
+    public virtual void Wipe()
     {
         if (visuallyMarkedPoints != null)
         {

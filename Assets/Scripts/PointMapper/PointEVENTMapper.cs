@@ -4,6 +4,11 @@ using UnityEngine.XR.ARFoundation;
 using System.IO;
 using UnityEngine.UI;
 
+/*
+    TODO: visually mark points with particles in real time
+    (replace the old marker)
+*/
+
 public class PointEVENTMapper : PointMapper
 {
     public Text pointsTrackedDebug;
@@ -104,6 +109,23 @@ public class PointEVENTMapper : PointMapper
         {
             fileDebug.text = "Write to file threw " + e.Message;
             Debug.Log(e);
+        }
+    }
+
+    public override void Wipe()
+    {
+        if (trackedPoints != null)
+        {
+            for (int i = 0; i < visuallyMarkedPoints.Count; i++)
+            {
+                GameObject toDelete = visuallyMarkedPoints[i];
+                Destroy(toDelete);
+            }
+            visuallyMarkedPoints.Clear();
+
+            trackedPoints.Clear();
+
+            pointsTrackedDebug.text = "Points Tracked: 0";
         }
     }
 

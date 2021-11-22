@@ -86,6 +86,21 @@ Computer stereo vision
 
 accelerometer and gyro data for placement and rotation
 
+
+I KNOW HOW TO TRACK FURNITURE!!
+look for things that are elevated above the floor,
+if it's above the average floor height, and the surface area is much lower than the floor height,
+it's furniture!!
+be sure to account for stairs, they will be their own case, maybe think about them as "Links between floors"
+rather than their own thing.
+I can generate my own stairs if it's not in VR
+
+Be sure not to be confused by ceiling, maybe cull it if it's over what the person can stand on
+
+https://www.google.com/search?q=3d+point+cloud+optimization&rlz=1C1ONGR_enUS937US937&sxsrf=AOaemvKydWY4wOExvheK_egWhwWSDAFw4w%3A1637548009523&ei=6f-aYeivH9qu0PEPqvS7kAc&ved=0ahUKEwioyKPb9ar0AhVaFzQIHSr6DnIQ4dUDCA4&uact=5&oq=3d+point+cloud+optimization&gs_lcp=Cgdnd3Mtd2l6EAMyBggAEAgQHjoHCAAQRxCwAzoECAAQHjoGCAAQDRAeOgUIABDNAjoECCEQCkoECEEYAFCDEljLNmCDOWgEcAJ4AIABXYgBkwWSAQE5mAEAoAEByAEIwAEB&sclient=gws-wiz
+https://www.google.com/search?q=3d+point+cloud&rlz=1C1ONGR_enUS937US937&sxsrf=AOaemvIolRiM7T9o0aCsOmeTJSPYXgnZlQ%3A1637539755925&ei=q9-aYdDqN4Xo9AP4sKuABw&ved=0ahUKEwiQ7NP71qr0AhUFNH0KHXjYCnAQ4dUDCA4&uact=5&oq=3d+point+cloud&gs_lcp=Cgdnd3Mtd2l6EAMyBAgjECcyBQgAEJECMgUIABCRAjIFCAAQkQIyBQgAEJECMgUIABCABDIFCAAQgAQyBQgAEIAEMgUIABCABDIFCAAQgAQ6CAgAEIAEELEDOgQIABBDOg0IABCABBCHAhCxAxAUOgsIABCABBCxAxCDAToKCAAQsQMQgwEQQzoKCC4QxwEQrwEQQzoKCAAQgAQQhwIQFEoECEEYAFAAWP0QYIYSaABwAngAgAF8iAHxCJIBBDEzLjGYAQCgAQHAAQE&sclient=gws-wiz
+
+
 -------------------------------------------------------------------------------------------
 =======================================    Networked Multiplayer   =================================
 -------------------------------------------------------------------------------------------
@@ -172,3 +187,19 @@ also there seem to be some points that drift out in space...
 Conclusion:
 I hope that event mapper will grab fewer dupes. If not, I'll come up with a space partitioning algorithm.
 I should run more analysis on the points to determine how to optimize them, starting w/ dupe elimination.
+
+~~~~~Scans8-11.21.21 (Multiple files)~~~~~
+
+Range tested 0.85 - 0.7
+This seems to be a good range
+0.85, file 8, seems to have a lot of large holes, maybe the important points are grabbed however
+0.7, file 11, seems to put a lot of extra points out in space, if I'm going for furniture, I'll want
+low confidence, but .7 might be too low.
+
+-------------------------------------------------------------------------------------------
+=======================================    Optimization Techniues   =================================
+-------------------------------------------------------------------------------------------
+
+Truncate or round points down 2, 3, or 4 places after the decimal, then use a 3D hashmap (Map<Float, Map<Float, Map<Float, V>>>)
+spatial segmentation can optimize the ability 
+Compress the number of filed points in the "processing" stage
