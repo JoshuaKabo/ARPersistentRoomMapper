@@ -5,6 +5,11 @@ using System.IO;
 using UnityEngine.UI;
 
 /*
+    TODO: Duplicate Assistance:
+    hashset for explicit key x, y, z and no value
+    hashmap for key on x y z, and value on an extra set of data.
+
+
     TODO: visually mark points with particles in real time
     (replace the old marker)
 */
