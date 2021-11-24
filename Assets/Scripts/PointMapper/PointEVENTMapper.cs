@@ -9,6 +9,8 @@ using UnityEngine.UI;
     hashset for explicit key x, y, z and no value
     hashmap for key on x y z, and value on an extra set of data.
 
+    TODO: Level floors
+    Be sure that all "floor" points are on same y, so not accidentally a slope
 
     TODO: visually mark points with particles in real time
     (replace the old marker)
@@ -18,7 +20,8 @@ public class PointEVENTMapper : PointMapper
 {
     public Text pointsTrackedDebug;
 
-    private List<PointDataObject> trackedPoints;
+    // Used to be: private List<PointDataObject> trackedPoints; (hashset eliminates dupes)
+    private HashSet<Vector3> trackedPoints;
 
     private void Awake()
     {
@@ -27,7 +30,7 @@ public class PointEVENTMapper : PointMapper
 
     protected override void Start()
     {
-        trackedPoints = new List<PointDataObject>();
+        trackedPoints = new HashSet<Vector3>();
         visuallyMarkedPoints = new List<GameObject>();
         pointsForObj = new List<Vector4>();
         confDebug.text = "conf: " + necessaryConfidenceAmt;
@@ -50,9 +53,17 @@ public class PointEVENTMapper : PointMapper
         {
             if (confidencesToTrack[i] >= necessaryConfidenceAmt)
             {
-                trackedPoints.Add(new PointDataObject(0, pointsToTrack[i].x, pointsToTrack[i].y, pointsToTrack[i].z, confidencesToTrack[i]));
+                trackedPoints.Add(new Vector3(truncateFloat(pointsToTrack[i].x, 2), truncateFloat(pointsToTrack[i].y, 2), truncateFloat(pointsToTrack[i].z, 2)));
             }
         }
+    }
+
+    float truncateFloat(float f, int decimalPlaces)
+    {
+        // Note: this could be unrolled to use little extra operations by using same truncator for all data
+        float truncator = Mathf.Pow(10f, decimalPlaces);
+
+        return Mathf.Round(f * truncator) / truncator;
     }
 
     // Tracks points from all clouds that might exist only when they update
@@ -85,7 +96,6 @@ public class PointEVENTMapper : PointMapper
 
         try
         {
-            int prevGroupNum = -1;
             float timeSinceRecording = Time.time - mappingInitTime;
             // use a list because unsure of number of groups
             List<string> objLines = new List<string>();
@@ -94,17 +104,17 @@ public class PointEVENTMapper : PointMapper
             objLines.Add("# Time spent collecting data: " + timeSinceRecording);
             objLines.Add("mtllib pointmapping.mtl");
 
-            for (int i = 0; i < trackedPoints.Count; i++)
+            foreach (Vector3 point in trackedPoints)
             {
-                // Note/Warning: assumes group numbers will increase in order
-                if (trackedPoints[i].groupnum > prevGroupNum)
-                {
-                    prevGroupNum++;
-                    objLines.Add("o PtMappingG" + prevGroupNum);
-                }
-
-                // confidences are thresholded earlier, so I can just grab everything prevetted
-                objLines.Add("v " + trackedPoints[i].x + ' ' + trackedPoints[i].y + ' ' + trackedPoints[i].z + ' ' + trackedPoints[i].w);
+                // NOTE: removed group number functionality
+                //// Note / Warning: assumes group numbers will increase in order
+                //// if (trackedPoints[i].groupnum > prevGroupNum)
+                //// {
+                ////     prevGroupNum++;
+                ////     objLines.Add("o PtMappingG" + prevGroupNum);
+                //// }
+                // Note - to get really serious abt saving data, could try a custom float of my own
+                objLines.Add("v " + point.x + ' ' + point.y + ' ' + point.z);
             }
 
             File.WriteAllLines(filePath, objLines);
