@@ -5,9 +5,7 @@ using System.IO;
 using UnityEngine.UI;
 
 /*
-    TODO: Duplicate Assistance:
-    hashset for explicit key x, y, z and no value
-    hashmap for key on x y z, and value on an extra set of data.
+    Collector dispatches the other point classes
 
     TODO: Level floors
     Be sure that all "floor" points are on same y, so not accidentally a slope

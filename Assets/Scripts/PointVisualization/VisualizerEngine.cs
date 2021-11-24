@@ -103,7 +103,8 @@ public class VisualizerEngine : MonoBehaviour
                         // Debug.Log("z: " + positioning[2 + 1]);
                         z = float.Parse(positioning[2 + 1]);
                         // Debug.Log("conf: " + positioning[3 + 1]);
-                        conf = float.Parse(positioning[3 + 1]);
+                        // conf = float.Parse(positioning[3 + 1]);
+                        conf = 0.9f;
 
                         createVisPoint(x, y, z, conf, currGroupNum);
                     }
