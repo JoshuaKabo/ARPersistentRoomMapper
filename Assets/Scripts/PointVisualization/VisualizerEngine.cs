@@ -148,7 +148,6 @@ public class VisualizerEngine : MonoBehaviour
 }
 
 
-
 public struct PointDataObject
 {
     // Groupnum should be used for ease of visualization

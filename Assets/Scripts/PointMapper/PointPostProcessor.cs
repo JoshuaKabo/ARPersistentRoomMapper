@@ -4,15 +4,15 @@ using UnityEngine;
 
 public class PointPostProcessor : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    public void cleanUpPoints()
     {
-
+        /* Do something */
+        extractDeeperMeaning();
     }
 
-    // Update is called once per frame
-    void Update()
+    public void extractDeeperMeaning()
     {
-
+        /* Do something */
+        // NOW WRITE TO FILE
     }
 }

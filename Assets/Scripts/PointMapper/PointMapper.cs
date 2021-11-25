@@ -1,10 +1,17 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.XR.ARFoundation;
-using System.IO;
-using UnityEngine.Android;
+using UnityEngine.UI;
+
+/*
+    Collector dispatches the other point classes
+
+    TODO: Level floors
+    Be sure that all "floor" points are on same y, so not accidentally a slope
+
+    TODO: visually mark points with particles in real time
+    (replace the old marker)
+*/
 
 /*
     Pack mule to carry all point mapping functionality for inheritance
@@ -14,6 +21,7 @@ using UnityEngine.Android;
 
 public class PointMapper : MonoBehaviour
 {
+    public Text pointsTrackedDebug;
     public ARPointCloudManager pointCloudManager;
 
     public float necessaryConfidenceAmt = 0.9f;
@@ -29,6 +37,13 @@ public class PointMapper : MonoBehaviour
     public Text fileDebug;
     protected float mappingInitTime;
 
+    // Used to be: private List<PointDataObject> trackedPoints; (hashset eliminates dupes)
+    private HashSet<Vector3> trackedPoints;
+
+    private void Awake()
+    {
+        pointCloudManager.pointCloudsChanged += ctx => extractNewPoints(ctx.added, ctx.updated);
+    }
 
     protected virtual void Start()
     {
@@ -38,67 +53,48 @@ public class PointMapper : MonoBehaviour
         mappingInitTime = Time.time;
     }
 
-
-    public virtual void writeToObj()
+    private void trackAllPointsInCloud(ARPointCloud cloud)
     {
-        // ends up in Pixel 2 XL\Internal shared storage\Android\data\com.DefaultCompany.ARMappingTool\files
-        // https://github.com/HookJabs/CS240_3DRenderer/blob/master/crystals.obj
-        // https://answers.unity.com/questions/539339/saving-data-in-to-files-android.html
+        Unity.Collections.NativeArray<float> confidencesToTrack =
+                    (Unity.Collections.NativeArray<float>)
+                    cloud.confidenceValues;
 
-        string filePath = findFreshPath();
+        int cloudSize = confidencesToTrack.Length;
 
-        try
+        Vector3[] pointsToTrack = new Vector3[cloudSize];
+        ((Unity.Collections.NativeSlice<Vector3>)cloud.positions)
+            .CopyTo(pointsToTrack);
+
+        for (int i = 0; i < cloudSize; i++)
         {
-            // TODO: add confidence values into the obj file. I can then color particles based on conf
-            //       in my own visualizer.
-            float timeSinceRecording = Time.time - mappingInitTime;
-            string[] objLines = new string[pointsForObj.Count + 5];
-            objLines[0] = "# ARZombieMapper vertex obj output (ALL POINTS, no event used.)";
-            objLines[1] = "# Confidence threshold: " + necessaryConfidenceAmt;
-            objLines[2] = "# Time spent collecting data: " + timeSinceRecording;
-            objLines[3] = "mtllib pointmapping.mtl";
-            objLines[4] = "o Pointmapping";
-
-            for (int index = 0; index < pointsForObj.Count; index++)
+            if (confidencesToTrack[i] >= necessaryConfidenceAmt)
             {
-                Vector4 currentPoint = pointsForObj[index];
-                // prepare x, y, z, then confidence
-                objLines[index + 5] = "v " + currentPoint.x + ' ' + currentPoint.y + ' ' + currentPoint.z + ' ' + currentPoint.w;
+                trackedPoints.Add(new Vector3(
+                PointLiveProcessor.truncateFloat(pointsToTrack[i].x, 2),
+                PointLiveProcessor.truncateFloat(pointsToTrack[i].y, 2),
+                PointLiveProcessor.truncateFloat(pointsToTrack[i].z, 2)));
             }
-
-            File.WriteAllLines(filePath, objLines);
-            fileDebug.text = objLines.Length + " Lines written successfully!";
-        }
-        catch (System.Exception e)
-        {
-            fileDebug.text = "Write to file threw " + e.Message;
-            Debug.Log(e);
         }
     }
 
-    protected void markPointVisually(Vector3[] positions, int i)
+    // Tracks points from all clouds that might exist only when they update
+    private void extractNewPoints(List<ARPointCloud> added, List<ARPointCloud> updated)
     {
-        GameObject newMarker = Instantiate(marker);
-        marker.transform.position = positions[i];
-        visuallyMarkedPoints.Add(newMarker);
+        // note: added should really only be relevant on camera start...
+        foreach (ARPointCloud cloud in added)
+        {
+            trackAllPointsInCloud(cloud);
+        }
+
+        foreach (ARPointCloud cloud in updated)
+        {
+            trackAllPointsInCloud(cloud);
+        }
+
+        pointsTrackedDebug.text = "Points Tracked: " + trackedPoints.Count;
     }
 
     // delete all points
-    public virtual void Wipe()
-    {
-        if (visuallyMarkedPoints != null)
-        {
-            for (int i = 0; i < visuallyMarkedPoints.Count; i++)
-            {
-                GameObject toDelete = visuallyMarkedPoints[i];
-                Destroy(toDelete);
-            }
-            visuallyMarkedPoints.Clear();
-
-            pointsForObj.Clear();
-        }
-    }
-
     public void setConf(float val)
     {
         // Wipe and restart timer for the sake of pure data
@@ -126,22 +122,26 @@ public class PointMapper : MonoBehaviour
         }
     }
 
-
-    public string findFreshPath()
+    public void Wipe()
     {
-        // Get to the right file iteration (version 1 2 3, etc)
-        int currentIteration = 0;
-        string fileName = "pointmapping" + currentIteration + ".obj";
-        string filePath = Application.persistentDataPath + "/" + fileName;
-        while (File.Exists(filePath))
+        if (trackedPoints != null)
         {
-            currentIteration += 1;
-            fileName = "pointmapping" + currentIteration + ".obj";
-            filePath = Application.persistentDataPath + "/" + fileName;
-        }
+            for (int i = 0; i < visuallyMarkedPoints.Count; i++)
+            {
+                GameObject toDelete = visuallyMarkedPoints[i];
+                Destroy(toDelete);
+            }
+            visuallyMarkedPoints.Clear();
 
-        return filePath;
+            trackedPoints.Clear();
+
+            pointsTrackedDebug.text = "Points Tracked: 0";
+        }
     }
 
+    public void WritePoints()
+    {
+        PointFileWriter.writeToObj(trackedPoints, mappingInitTime, necessaryConfidenceAmt, fileDebug);
+    }
 
 }
