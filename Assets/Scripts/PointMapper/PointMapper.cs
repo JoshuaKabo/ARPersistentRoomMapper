@@ -7,8 +7,6 @@ using UnityEngine.UI;
     Mapper dispatches the other point classes, holds data
 
     TODO: Remember to request permissions nicely
-    TODO: Turn off rotate
-
 */
 
 public class PointMapper : MonoBehaviour
@@ -41,6 +39,8 @@ public class PointMapper : MonoBehaviour
         visuallyMarkedPoints = new List<GameObject>();
         confDebug.text = "conf: " + necessaryConfidenceAmt;
         mappingInitTime = Time.time;
+        trackedPoints = new HashSet<Vector3>();
+
     }
 
     private void trackAllPointsInCloud(ARPointCloud cloud)
