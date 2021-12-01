@@ -11,23 +11,26 @@ using UnityEngine.UI;
 
 public class PointMapper : MonoBehaviour
 {
-    public Text pointsTrackedDebug;
+    [Header("References")]
     public ARPointCloudManager pointCloudManager;
-
-    public float necessaryConfidenceAmt = 0.9f;
-
-    protected List<GameObject> visuallyMarkedPoints;
-
     public GameObject marker;
 
+    [Header("Debug UI")]
+    public Text pointsTrackedDebug;
     public Text debugText;
-
     public Text confDebug;
     public Text fileDebug;
-    protected float mappingInitTime;
+
+    [Header("Tweaking Parameters")]
+    [Range(0f, 1f)]
+    public float necessaryConfidenceAmt = 0.9f;
+    public const float floorYTolerance = 0.1f; //TODO: experiment w/ this value
+    public const float floorXZTolerance = 0.2f; //TODO: experiment w/ this value
 
     // Used to be: private List<PointDataObject> trackedPoints; (hashset eliminates dupes)
     private HashSet<Vector3> trackedPoints;
+    protected List<GameObject> visuallyMarkedPoints;
+    protected float mappingInitTime;
 
     private void Awake()
     {

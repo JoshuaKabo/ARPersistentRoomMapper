@@ -36,4 +36,26 @@ public static class PointLiveProcessor
         marker.transform.position = positions[i];
         visuallyMarkedPoints.Add(newMarker);
     }
+
+    /*
+
+    what if the floor yeilds few to 0 points?
+    
+
+    */
+
+    /*
+
+    possible functions:
+
+    process floor()
+        Delete non-edge vertices
+        The floor will be the lowest set of points in a room
+
+    process non-floor()
+        Nonfloor can be walls (no depth, so delete)
+        Stairs (keep and or substitute for ramps)
+        furniture (has depth, off the floor, v important)
+
+    */
 }

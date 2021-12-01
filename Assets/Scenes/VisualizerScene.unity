@@ -993,7 +993,7 @@ PrefabInstance:
     - target: {fileID: 3062401801264580470, guid: de1ce151e88b69e45ab6178ab09da2dc,
         type: 3}
       propertyPath: filePath
-      value: Assets/MappedDemos/pointmapping8.obj
+      value: Assets/MappedDemos/pointmapping1.obj
       objectReference: {fileID: 0}
     - target: {fileID: 3062401801264580470, guid: de1ce151e88b69e45ab6178ab09da2dc,
         type: 3}

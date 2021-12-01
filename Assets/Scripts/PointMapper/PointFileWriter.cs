@@ -38,7 +38,7 @@ public static class PointFileWriter
             //       in my own visualizer.
             float timeSinceRecording = Time.time - mappingInitTime;
             string[] objLines = new string[pointsForObj.Count + 5];
-            objLines[0] = "# ARZombieMapper vertex obj output (ALL POINTS, no event used.)";
+            objLines[0] = "# ARZombieMapper vertex obj output";
             objLines[1] = "# Confidence threshold: " + necessaryConfidenceAmt;
             objLines[2] = "# Time spent collecting data: " + timeSinceRecording;
             objLines[3] = "mtllib pointmapping.mtl";

@@ -13,19 +13,19 @@ using UnityEngine;
 public class VisualizerEngine : MonoBehaviour
 {
 
+    [Header("Input")]
     public string filePath = "Assets/MappedDemos/pointmapping0.obj";
 
-    private List<Color> groupColors;
 
+    [Header("Prefab References")]
     public GameObject groupOrganizerPrefab;
-    private GameObject currentGroupParent;
     public GameObject pointPrefab;
-    // read the file
-    // each is group num, confidence, and 3 spacial dimensions
+    private GameObject currentGroupParent;
 
     // NOTE: this is memory inefficient, do something better in production
     private List<PointDataObject> uninitializedPoints;
     private List<GameObject> createdPoints;
+    private List<Color> groupColors;
 
     // start @ -1 because the first readable line of any of these files will be a fresh object
     private int currGroupNum = -1;
@@ -49,7 +49,6 @@ public class VisualizerEngine : MonoBehaviour
             changeColorMode();
         }
     }
-
 
     public void readData()
     {
@@ -116,7 +115,7 @@ public class VisualizerEngine : MonoBehaviour
         catch (System.Exception e)
         {
             Debug.LogError("File Read Error:");
-            Debug.LogError(e.Message);
+            Debug.LogError(e.Message + "\n" + e.StackTrace);
         }
     }
 
