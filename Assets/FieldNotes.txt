@@ -111,6 +111,8 @@ What if I just used the current pointcloud to make a voxel navmesh
 it's not about the pointcloud points, but just the voxels that 
 aren't obstructed by the points...
 
+Should try multiple approaches
+PCL is too complicated to use directly, would mean using a bunch of libs, compiling differently, using formats and datastruct I don't like.
 -------------------------------------------------------------------------------------------
 =======================================    Networked Multiplayer   =================================
 -------------------------------------------------------------------------------------------
