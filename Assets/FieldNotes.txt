@@ -113,6 +113,8 @@ aren't obstructed by the points...
 
 Should try multiple approaches
 PCL is too complicated to use directly, would mean using a bunch of libs, compiling differently, using formats and datastruct I don't like.
+
+Note - do not reference PCL publically, they don't want me to
 -------------------------------------------------------------------------------------------
 =======================================    Networked Multiplayer   =================================
 -------------------------------------------------------------------------------------------
@@ -240,5 +242,61 @@ point to neighbor distances drives the builk of the algorithm
     - all pts w/ mean outside mean _defined by global dist mean & std dev_
         - can be labeled ouliers and trimmed
 (off topic) do unity pointclouds have normals?? NO
+
 <class by class>
-Approximate Voxel Grid
+
+++Approximate Voxel Grid++
+assembles a local 4d grid over a pointcloud and downsamples+filters the data
+voxel "leaf" size can be set
+filter method
+hold on to removed indiices - fluff
+**applyfilter() - the root of the voxelized grid filter
+
+++Bilateral Filter++
+A gaussian Bilateral filter window is user set
+std dev, search, point weight are used
+
+TODO: look into pcls nearest neighbors methodology
+    + what does it mean for a point cloud to be organized?
+
+++BoxClipper3D++
+uses a unit cube and transformations of points before culling
+
+++ConditionalRemoval++
+you can set a value to filtered points rather than removing them
+use of condidiontand and conditionor
+which operate on comparisons
+example is an xy range
+another example seems to be a quadratic comparison of geometry
+
+++Convolution++
+math op on two funcs f and g, producing a third func, noted as f or g modified
+uses a convolving kernel, borders
+dist threshold, number of threads
+row and column convolution
+point cloud needs to be organized
+distance threshold helps to keep out ghost points
+it is recommended to calibrate this value to the sensor...
+
+++Gaussian Kernel++
+
+++Crop Box++
+simple crop out everything not in this box
+doen't have to be a box, other classes are other shapes
+** Note: If I find out the dimensions of a room, I could run a crop box on it
+
+++Functor Filter++
+take in a function object, anything, like lambda, and use that as a filter
+
+++ExtractIndices++
+grabs indicies out of the pointcluod using a filter
+
+!!Important Tangent!!
+I should make sure my idea works before I refine it
+I'll keep reading up here, but it's important that I work on 
+ensuring this will work ACROSS DEVICES
+    that means positioning primarily.
+    but also the other core features of the app
+    will networking work?
+    will two cameras pick up on the same points?
+    Could even buy an iphone 6 or ipod touch 7th gen to test with
