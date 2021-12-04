@@ -221,3 +221,24 @@ Compress the number of filed points in the "processing" stage
 -------------------------------------------------------------------------------------------
 Unity navmesh uses voxels, which determine based on coarseness, obstructions,
 entity dimensions, etc, what can be navigatable.
+
+-------------------------------------------------------------------------------------------
+=======================================    Objective    =================================
+-------------------------------------------------------------------------------------------
+FILTERS
+https://pointclouds.org/documentation/group__filters.html
+
+__most filtering (first page):__
+shadow points are removed by performing statistical analysis on
+neighbor points, you trim out the points not fitting criteria
+(probably set by hand)
+
+point to neighbor distances drives the builk of the algorithm
+    - get the mean dist to all neighbors
+    - assume the distribution is gaussina
+        (w/ mean and std dev)
+    - all pts w/ mean outside mean _defined by global dist mean & std dev_
+        - can be labeled ouliers and trimmed
+(off topic) do unity pointclouds have normals?? NO
+<class by class>
+Approximate Voxel Grid
