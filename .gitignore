@@ -60,6 +60,8 @@ crashlytics-build.properties
 
 /Assets/MappedDemos/*
 /Assets/TextMesh Pro/*
+/Assets/Samples/*
 
 Assets/TextMesh Pro.meta
 UserSettings/Layouts/default-2021.dwlt
+Assets/Samples.meta
