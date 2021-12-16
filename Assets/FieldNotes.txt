@@ -115,6 +115,12 @@ Should try multiple approaches
 PCL is too complicated to use directly, would mean using a bunch of libs, compiling differently, using formats and datastruct I don't like.
 
 Note - do not reference PCL publically, they don't want me to
+
+Turns out snapchat's "lens" stuff is only for use in the snapchat app
+you can get ad revenue through a lens, but that's it.
+It's a super tight, enclosed platform, and that's snapchat's planned hub for AR
+lol
+so don't even feel bad, still doing quite good.
 -------------------------------------------------------------------------------------------
 =======================================    Networked Multiplayer   =================================
 -------------------------------------------------------------------------------------------
