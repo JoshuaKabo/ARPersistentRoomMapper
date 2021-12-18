@@ -50,9 +50,24 @@ public class ClientBehavior : MonoBehaviour
 
         // PopEvent is designed for a single connection
         // Pops network events off the stack for processing
-        while ((cmd = m_Connection.PopEvent(m_Driver, out stream)) != NetworkEvent.Type.Empty)
+        while ((cmd = m_Connection.PopEvent(m_Driver, out dataStreamReader)) != NetworkEvent.Type.Empty)
         {
-            // 
+            // NetworkEvent.Type.Connect event - tells that
+            // you recieved a Connection accept message, now connected to the remote peer
+            if (cmd == NetworkEvent.Type.Connect)
+            {
+                Debug.Log("I, the Client, connected to the server!");
+
+                uint value = 1;
+                // NOTE: This may not be the BeginSend paramlist I want
+                m_Driver.BeginSend(m_Connection, out DataStreamWriter dataStreamWriter);
+                dataStreamWriter.WriteUInt(value);
+                m_Driver.EndSend(dataStreamWriter);
+            }
+            else if (cmd == NetworkEvent.Type.Data)
+            {
+                uint value = dataStreamReader.ReadUInt();
+            }
         }
 
     }
