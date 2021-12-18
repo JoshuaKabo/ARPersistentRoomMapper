@@ -9,7 +9,7 @@ public class ClientBehavior : MonoBehaviour
     public NetworkDriver m_Driver;
     public NetworkConnection m_Connection;
 
-    public bool communicationDone;
+    private bool communicationDone;
 
 
     private void Start()
@@ -41,7 +41,7 @@ public class ClientBehavior : MonoBehaviour
         if (!m_Connection.IsCreated)
         {
             if (!communicationDone)
-                Debug.Log("Something went wrong during connect");
+                Debug.Log("c: Something went wrong during connect");
         }
 
         DataStreamReader dataStreamReader;
@@ -56,7 +56,7 @@ public class ClientBehavior : MonoBehaviour
             // you recieved a Connection accept message, now connected to the remote peer
             if (cmd == NetworkEvent.Type.Connect)
             {
-                Debug.Log("I, the Client, connected to the server!");
+                Debug.Log("c: connected to the server!");
 
                 uint value = 1;
                 // NOTE: This may not be the BeginSend paramlist I want
@@ -67,6 +67,16 @@ public class ClientBehavior : MonoBehaviour
             else if (cmd == NetworkEvent.Type.Data)
             {
                 uint value = dataStreamReader.ReadUInt();
+                Debug.Log("c: got the value: " + value + " from the server.");
+                communicationDone = true;
+                m_Connection.Disconnect(m_Driver);
+                // Reset to avoid stale references
+                m_Connection = default(NetworkConnection);
+            }
+            else if (cmd == NetworkEvent.Type.Disconnect)
+            {
+                Debug.Log("c: got disconnected from server.");
+                m_Connection = default(NetworkConnection);
             }
         }
 

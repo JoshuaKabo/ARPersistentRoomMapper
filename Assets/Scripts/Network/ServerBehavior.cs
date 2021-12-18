@@ -21,7 +21,7 @@ public class ServerBehavior : MonoBehaviour
 
         // Try to bind to a specific port and any ipv4
         if (m_Driver.Bind(endPoint) != 0)
-            Debug.Log("Failed to bind to port 9000");
+            Debug.Log("s: Failed to bind to port 9000");
         else
         {
             // Now actively listening for connections
@@ -66,7 +66,7 @@ public class ServerBehavior : MonoBehaviour
         while ((connection = m_Driver.Accept()) != default(NetworkConnection))
         {
             m_Connections.Add(connection);
-            Debug.Log("Accepted a connection from: " + connection);
+            Debug.Log("s: Accepted a connection!");
         }
 
         // Start querying the driver for events that might have happened
@@ -90,7 +90,7 @@ public class ServerBehavior : MonoBehaviour
                 {
                     // Try to read a uint from stream, output it
                     uint number = dataStreamReader.ReadUInt();
-                    Debug.Log("Got" + number + " from the Client. Adding + 2 to it!");
+                    Debug.Log("s: Got" + number + " from the Client. Adding + 2 to it!");
 
                     // Now add 2 and send it back (using a DataStreamWriter)
                     number += 2;
@@ -106,7 +106,7 @@ public class ServerBehavior : MonoBehaviour
                 // disconnect case
                 else if (cmd == NetworkEvent.Type.Disconnect)
                 {
-                    Debug.Log("Client disconnected from server");
+                    Debug.Log("s: Client disconnected from server");
                     // resets the connection
                     m_Connections[i] = default(NetworkConnection);
                 }

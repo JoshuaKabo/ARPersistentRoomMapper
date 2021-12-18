@@ -121,6 +121,16 @@ you can get ad revenue through a lens, but that's it.
 It's a super tight, enclosed platform, and that's snapchat's planned hub for AR
 lol
 so don't even feel bad, still doing quite good.
+
+KISS on netcode.
+I know to avoid in depth safety features, but I must also avoid 
+anything that's too much polish. I don't need crazy interpolation for this game
+I should still view guides on all things netcode.
+
+KISS on everything, really
+ik reach might be going too far..
+smart networking might be too far...
+
 -------------------------------------------------------------------------------------------
 =======================================    Networked Multiplayer   =================================
 -------------------------------------------------------------------------------------------
