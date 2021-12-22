@@ -1,0 +1,201 @@
+Job system is for streamlined (safe and simple) multithreaded code.
+Jobified code works w/ unity for enhanced game performance.
+
+Can be used w/ Entity Component System (ECS) to make efficient machine code for all platforms.
+
+Interestingly, Unity aims to make fewer threads than CPU cores, to prevent contention for CPU resources.
+Doesn't this go against what I learned in school??
+NOPE - context switching (dropping everything for another core to take over, then picking back up where left off)
+is resource intesive. This makes a lot of sense.
+
+C# job safety
+race conditions are mitigated
+Job sys detects race conditions and protects you from them
+ex: job sys sends reference to data from code in main thread to a job
+it cannot verify f main thread is reading at same time, means race condition
+C# resolvves this by sending ea job a copy of the data it needs to operate on,
+rather than a refreence to the data
+a job can access only blittable data types (types that are identical in mem for managed and unmanaged code)
+these types need no conversion when passed between managed and native code
+C# job sys cna memcpy blittable types, transfer data between managed & native unity parts
+
+native container
+safety sys has drawbacks
+copying data isolates the results of a job w/in ea copy
+you need to store the results in a shared memory type, a NativeContainer
+(maybe this is why the AR stuff uses something similar)
+it provides a safe C# wrapper for native mem
+contains a pointer to an unmanaged allocation
+allows a job to access data shared with the main thread rather than working with a copy
+unity shies w/ nativearray - a native container
+nativeslice gets a subset of the nativearray
+there is a native everything, hashmap, list, etc
+these are all RW safety chacked
+
+safety checks are only available in unity editor and play mode
+SO WHY THE FUCK DO THEY EXIST??? as a template? Why not a small api/lib??
+DisposeSentinel, atomicsfetyhandle will warn you of mem leaks, multiple access
+
+atomicsfetyhandle for mult access atomicity
+schedule a job w/ a dependency
+job1 - write to nativecontainer
+once j1 is done, j2 can rw to that nc
+rw restrictions also apply to main thread data access
+allows parallel read
+
+jobs have default RW access to ncs
+you can (and should when you know you don't need write) make readonly:
+
+[ReadOnly]
+public NativeArray<int> input;
+now you can exe the job at the same time as other jobs that also have read only access to nativeArray
+there is no protection against accessing static data within a job, no safeties, can crash unity
+
+
+NCs need mem alloc type specification
+alloc type depends on len of job time. you can tailor your alloc to get best performance possible
+3 allocator types for NC mem alloc and release:
+Allocator.Temp
+    fastest alloc, for allocs that last 1 frame or fewer. cant use temp to pass NC allocs to jobs
+Allocator.TempJob
+    medium speed. for thread safe alloc, mem lifespan of about 4 frames. must dispose this alloc w/in
+    4 frames, or console will print a warning
+Allocator.Persistent
+    slowest, but lasts as long as you want, a wrapper for malloc
+
+ex:
+NativeArray<float> result = new NativeArray<float>(1, Allocator.TempJob);
+1 - size of NA, 1 elem, only one piece of dat ain result.
+
+Creating Jobs
+need to implement IJob, allows schedule of 1 job that runs in parallel to any other jobgs that are running
+anything implementing ijob is referred to as a job
+to make a job
+1 - create a struct implementing job
+2 - add member vars that the job uses (blittable types or nativecontainers)
+3 - create Execute method in func, with job implementation inside
+
+execute runs on 1 core
+jobs run on copies of data, except for nativecontainer
+the only way to access data from a job in main thread is by writing to a nativecontainer
+simple job struct definition:
+public struct MyJob : IJob
+{
+    public float a;
+    public float b;
+    public NativeArray<float> resutl;
+
+    public void Execute()
+    {
+        result[0] = a + b;
+    }
+}
+
+Scheduling Jobs
+to sched in main thread
+1 instantiate job
+2 populate job's data
+3 call schedule method
+
+schedule method puts job into queue for exec at appropriate time
+once scheduled, a job can't be interrupted
+
+// Create a native array of a single float to store the result. This example waits for the job to complete for illustration purposes
+NativeArray<float> result = new NativeArray<float>(1, Allocator.TempJob);
+
+// Set up the job data
+MyJob jobData = new MyJob();
+jobData.a = 10;
+jobData.b = 10;
+jobData.result = result;
+
+// Schedule the job
+JobHandle handle = jobData.Schedule();
+
+// Wait for the job to complete
+handle.Complete();
+
+// All copies of the NativeArray point to the same memory, you can access the result in "your" copy of the NativeArray
+float aPlusB = result[0];
+
+// Free the memory allocated by the result array
+result.Dispose();
+
+Jobhandle and dependencies
+scheulde method returns a jobhandle
+use this asa dependency for other jobs
+if one job depends on the results of another, you can pass j1's handle to j2's schedule
+combine dependencies to merge 
+
+you make a nativearray of handles, and populate with handles from multiple jobs
+NativeArray<JobHandle> handles = new NativeArray<JobHandle>(numJobs, Allocator.TempJob);
+
+// Populate `handles` with `JobHandles` from multiple scheduled jobs...
+
+JobHandle jh = JobHandle.CombineDependencies(handles);
+
+use jobhandle to force code to wait in main thread for job to finish
+call complete on handle, so main thread can safely access native container from the job
+
+jobs don't start execution on scheudele
+call complete to flush job from mem chache and start execution
+complete call on jobhandle -
+returns ownership of that job's nativecontainer types to main thread. call complete
+on a handle to access the NC safely from main thread
+can call complete on jobA, or B whpo depends on A
+otherwise. fluch the batch, w/ static JobHandle.ScheduleBatchedJobs
+
+ParallelFor Jobs
+when scheduling, only one job is doing one task
+to do the same operation on a large amount of objects, use IJobParallelFor
+uses Nativearray
+one job per core
+call execture once per item in source
+must specify len of NA to split
+len tells jobs how any executes to expect
+
+it's behind scenes dividing into batches, each w/ subset of exec methods
+one job per core
+when one finishes early, it steals the remaining from other native jobs.
+half at a time, saving cache locality
+optimize - specify job count, tells how many jobs you get, how coarse the redistribution is
+low count, 1, is even work between threads, but more overhead
+
+parallelfortransform - designed for operating on transforms
+
+troubleshooting:
+don't access static data from a job
+you'll crtash unity w/ unexpected, illegible error
+flush scheduled batches
+negatively impacts performance, not flushing delays scheduling until main waits for result
+other cases - use jobhanle.complete to start execution
+ECS flushes for you
+
+don't try to update nativecontianer contents
+not possible to change content of container
+you must copy to local temp, then copy back in
+
+call jobhandle.complete to regain ownership
+tracing dataownership requeires dependeces to complete before main thread can use again
+cannot just check iscompleted
+need to call complete to regain ownership, like lakewood
+w/o, there's a mem leak
+schedule and complete in main
+only in main, jobs cannot schedule jobs, use main to pass handles instead
+schedule and complete at the right time
+call sched on a job as soon as you have the data needed, don't call complete until you need
+the results. Schedule a job you don't need to wait for when it's not competing with other jobs
+mark nativecontainer types readonly when you can. speeds things up
+check for data dependencies 
+in profiler there's a waitforjobgroup marker. means unity main thread is waiting on a job to complete.
+means the data dependency should be resolved. 
+jobhandle.compelte to track where the dependency is making main wait
+jobs can be Run instead of Schedule to immediately act. for debugging.
+don't alloc mem in jobs
+alloc is stupid slow.
+
+LLVM burst optimizes multithreaded code for all machines.
+
+
+READ THESE:
+https://docs.unity3d.com/Manual/JobSystemTroubleshooting.html
