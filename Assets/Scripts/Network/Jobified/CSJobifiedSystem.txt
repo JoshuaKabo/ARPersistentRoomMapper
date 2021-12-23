@@ -195,7 +195,3 @@ don't alloc mem in jobs
 alloc is stupid slow.
 
 LLVM burst optimizes multithreaded code for all machines.
-
-
-READ THESE:
-https://docs.unity3d.com/Manual/JobSystemTroubleshooting.html
