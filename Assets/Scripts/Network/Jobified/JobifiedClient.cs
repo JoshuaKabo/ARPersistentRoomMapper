@@ -45,6 +45,8 @@ public class JobifiedClient : MonoBehaviour
         ClientJobHandle = m_Driver.ScheduleUpdate();
         // now give the handle to the job to a new schedule
         ClientJobHandle = job.Schedule(ClientJobHandle);
+        // the job will populate the internal buffers of netdriver
+        // and lets us call popevent / popeventforconnections
     }
 
     private void OnDestroy()
