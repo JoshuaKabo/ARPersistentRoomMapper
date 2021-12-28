@@ -5,18 +5,21 @@ using Unity.Networking.Transport;
 using Unity.Jobs;
 using UnityEngine.Assertions;
 
+
 public class JobifiedServer : MonoBehaviour
 {
     public NetworkDriver m_Driver;
-    public NativeArray<NetworkConnection> m_Connections;
+    public NativeList<NetworkConnection> m_Connections;
 
     // Keeps track of ongoing jobs
     private JobHandle ServerJobHandle;
 
+    private const int CONNECTIONS_PER_THREAD = 1;
+
     void Start()
     {
         // still 16 capped on connections...
-        m_Connections = new NativeArray<NetworkConnection>(16, Allocator.Persistent);
+        m_Connections = new NativeList<NetworkConnection>(16, Allocator.Persistent);
         m_Driver = NetworkDriver.Create();
 
         NetworkEndPoint endpoint = NetworkEndPoint.AnyIpv4;
@@ -42,19 +45,19 @@ public class JobifiedServer : MonoBehaviour
         ServerUpdateJob serverUpdateJob;
         serverUpdateJob = new ServerUpdateJob
         {
+            // verifies driver concurrency
             driver = m_Driver.ToConcurrent(),
-            // this would be a deferred job array, but instead I'll just make both lists?
-            connections = m_Connections
+            // AsDeferredJobArray - IMPORTANT, a promise array to handle once connections are managed!
+            connections = m_Connections.AsDeferredJobArray()
         };
 
         ServerJobHandle = m_Driver.ScheduleUpdate();
         ServerJobHandle = connectionJob.Schedule(ServerJobHandle);
-        // batch count = 1
-        // <NativeList<NetworkConnection>>
-        // TODO: parallel jobs work very differently now than they used to. 
-        // TODO: Set up the datastruct, then give the number of connections to update (all)
-        // TODO: Then, the number of connections per thread 
-        ServerJobHandle = serverUpdateJob.Schedule(m_Connections, 0, ServerJobHandle);
+
+        // HANDLE IS VERY IMPORTANT
+        ServerJobHandle = serverUpdateJob.Schedule(m_Connections, CONNECTIONS_PER_THREAD, ServerJobHandle);
+        // Chain: driver.update -> serverupdateconnectionsjob -> serverupdatejob
+
     }
 
 
@@ -70,24 +73,13 @@ public class JobifiedServer : MonoBehaviour
     // server jobs goal is to fan out and run the processing
     // code for all connections in parallel (hint: IJobParallelFor)
     // BUT we don't know how many connections will be recieved, so
-    // we should use IJobParallelForDefer, however, that seems to 
-    // be deprecated w/ no alternative. Maybe just use the OS's threads api?
-
-    /*
-    3 Options:
-    1 - use OS threads api
-    2 - use a fixed size, loaded with a bunch of blanks
-        if there isn't a connection in that slot, skip it
-    3 - just power through and see where I get stuck
-    Could break up the connections into threadable groups?
-    */
-    struct ServerUpdateJob : IJobParallelFor
+    // we should use IJobParallelForDefer
+    struct ServerUpdateJob : IJobParallelForDefer
     {
         // Note the use of concurrent nw driver!
         // Allows call of the NWD from multiple threads
         public NetworkDriver.Concurrent driver;
-        // Use of NativeArray instead of NativeList (would have been
-        // important for a defered job)
+        // connections was a list for add/remove connections, here it makes sense as an array
         public NativeArray<NetworkConnection> connections;
 
         // Execute iterates over connections using index
@@ -136,10 +128,12 @@ public class JobifiedServer : MonoBehaviour
             {
                 if (!connections[i].IsCreated)
                 {
+                    // 
                     connections.RemoveAtSwapBack(i);
                     --i;
                 }
             }
+
             // Accept new connections
             NetworkConnection c;
             while ((c = driver.Accept()) != default(NetworkConnection))
