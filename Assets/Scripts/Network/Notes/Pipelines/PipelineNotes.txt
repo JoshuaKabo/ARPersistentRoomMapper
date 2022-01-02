@@ -197,17 +197,3 @@ d/c on local netdriver
 
 connect is only available if netdriver is not listening
 accept connections
-
-** network settings
-the network settings api can change param default values
-stuff like timeout
-
-intetworkparam can be inherited
-any unmanaged struct can be a networkparam
-
-Ivalidatablenetworkparam interface
-for validation required params
-calls validate, throws exception if false
-
-netsettings extension methods
-hand in hand w/ inetparam
