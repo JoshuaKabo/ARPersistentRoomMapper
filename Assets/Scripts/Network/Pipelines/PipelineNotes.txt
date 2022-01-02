@@ -1,0 +1,199 @@
+pipelines offer functionality on top of the default socket
+implementation behavior.
+could mean udp w/ quality of service features, like
+sequencening, reliability, fragmentation, etc
+can work w/ any type of socket interface implemented for driver use
+
+how it works
+pipeline stages, can use any number of them
+goes through the stages until sent on wire
+unpacked in reverse order of stages.
+
+sequence example:
+
+--------------   ---------------   
+|s0: compress|-->||s1: sequence|
+--------------   ---------------
+
+which gets unwrapped in reverse order
+the stages are gathered in a collection
+a default collection is provided w/ driver, has
+all the built in stages
+can use default collection + custom collection
+
+pipeline params can be passed to collection,
+multiple, with collection taking care of putting them in the right stage
+
+pipeline is param, packet passed through is process right on recieving end
+client and server need EXACT SAME pipelines
+some, which don't change packet payload/header, don't need symmetry
+like simulator, which holds packets for a time, then releases unmodified
+or drops them
+(simulates bad network connection)
+only runs on client
+add simulator as last stage of pipeline
+
+m_DriverHandle = NetworkDriver.Create(new SimulatorUtility.Parameters {MaxPacketSize = NetworkParameterConstants.MTU, MaxPacketCount = 30, PacketDelayMs = 25, PacketDropPercentage = 10});
+m_Pipeline = m_DriverHandle.CreatePipeline(typeof(SimulatorPipelineStage));
+delay up to 30 packets, ea w/ 25 ms delay, 10% dropped
+
+debugging
+check simulatorutility.context structure
+can print time run, packet released, dropped packets, ready packets, count, etc
+
+reliability - delivered check, and in order
+ea packet gets header info
+state is tracked internally to make this happen
+when packet is sent, it's given seq id, stored in send processing buffer
+w/ timing info, packet is sent w/ seq id added to packet header
+header also know s delivery state
+on timeout, packet is resent, timers reset
+so I could use a reliability or default collection as "TCP" for 
+sending mapping data, then unfiltered for gameplay
+
+packet header:
+type
+process time
+seq id
+acked seq id
+ack mask
+
+type:
+ack is empty, just header
+payload
+process time can be used to calc rtt
+ackmask - history of acknowledgements known
+can acknowledge multiple packets in one header
+
+ack type used when certain time passed w/ nothing sent
+check if need to send ack back or alast assumed lost, resend happens
+
+reliability:
+just reliability. start w/ window size of 32
+max window = 32
+
+TO KEEP IN MiND:
+although lan ensures immediate, similar connections,
+it is likely that players will run to the far ends of their house
+also that players will be moving, resulting in degraded performance
+
+only 32 packets at a time, no more than 32 packets in flight at a time
+33rd results in error
+can check error code
+
+outgoing queue is full errror -
+an error when packets being sent too frequently, for latency/quality.
+high packet loss - packets need to stay for multiple rtts
+in the queue, if rtt is high, then that time can end up longer
+than send rate + window size permit. 
+60 packets sent per second, 1 packet every 16 ms
+if rtt is 250ms, 16 packets in queue at one time, 
+with packet drop, total time goes to 500ms, packet will be in last
+slot when freed
+
+reliability pipeline best for event type messages, like door opened,
+remote procedure calls, slow frequency messages, chat
+
+debug info - use getpipelinebuffers
+soakcommon.cs - soaker test gathers stats 
+gatherreliabilityStats func checks internal rtt, how many
+packets sent, recieved, dropped, duped, resent
+
+probably shouldn't worry too much, this is a free budget game
+
+
+UPDATE FLOW:
+call scheduleupdate on every frame
+allows update of ea connection to read all data recieved,
+finally produce events user can react to (most software level)
+using popevent and popeventforconnection
+
+driver update loop is more simple than it appears
+taking out job sys dependencies:
+
+------------------------
+start - monobehave update
+------------------------
+------------------------
+my call to networkdriver.scheduleupdate
+========================
+Netdriver scheduleupdate
+netdriver updatejob
+***********************
+netinterface scheduleupdate
++++++++++++++++++++++++
+netinterface scheduleupdate
+netinterface recievejob
+networkdriver appendpackrt
++++++++++++++++++++++++
+***********************
+========================
+------------------------
+
+InternalUpdate - start, cleans upp stale connections,
+clears buffers, checks connection timeouts
+chain runs recievejob for reading, parsing text from socket
+each new message recieved calls appendpacket, parses ea packet
+recieved, creates event for, or discards it
+
+update is over, clean up, populate buffers, push new events
+netdriver is like a control sys for the statemachine that 
+handles networkconnection
+
+understanding the connection state machine:
+transitions are important 
+subtle difference between Connecting to another host
+and Listen for incoming connections
+
+https://docs-multiplayer.unity3d.com/transport/1.0.0/connection-state
+start at disconnected
+
+can listen (passive)
+at which point you can recv connectionrequest
+sentHd a connectionaccept, send data flag=1
+then connection is reached
+
+or can send connectionrequest
+enter AwaitingResponse
+at which point can timeout on attempts,
+send disconnect for socket close, 
+attempts can go over max, or connection can be accepted
+
+in depth:
+all connections start as disconnected
+depending on NetworkDriver state, Listening might be triggered
+driver acts like a server, listens for incoming connections, data
+requests
+secondly, could try to use driver to connect to remote endpoint,
+starts another flow of state machine
+
+either you listen for incoming, or you use an outgoing
+connection to connect to someone else
+
+serverbehavior has listen, clientbehavior has connect.
+
+Event consumption:
+4 types of events supplied by netdriver
+empty, data,connect, and disconnect
+
+client and server loop want to consume events produced by netdriver
+done by calling popevent on ea networkconnection
+
+can popevent, or popevent for conection, kind of up to you
+
+to receieve anew connection, call accept. for all of these, the documentation
+is better for reference
+
+empty - event signaling no more messages in event queue to handle this frame
+data - data has been recieved from a connected endpoint
+connect - new connection established. only available if netdriver is 
+not in the listening state
+disconnect - recieved if 
+1 disconnect packet recieved (disconnect called)
+2 socket timeout happened
+3 max connect attempts on netconnection exceeded
+calling d/c on netconnection doesn't trigger
+d/c on local netdriver
+
+connect is only available if netdriver is not listening
+accept connections

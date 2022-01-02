@@ -185,7 +185,8 @@ A.A.0.17
 because it is strange, stays as
 123.456.789
 
-
+could have all as server and client, with a primary server, and others
+give details about 5m away updates
 
 -------------------------------------------------------------------------------------------
 =======================================    Feature List   =================================
