@@ -8,6 +8,11 @@ Maybe setup NuGet for deeper unity warnings
 ========================================   TODO   ========================================
 ------------------------------------------------------------------------------------------
 
+Tested in MappingScene:
+1. Test out device location services, do I really have whole house device x,y,z??
+    If not: engineer my own location service, at least using the x,y,z coords of points and a raycast
+
+
 Might want to get started on another aspect of this app, like zombies or ui, as a break
 
 ------------------------------------------------------------------------------------------
@@ -137,9 +142,27 @@ KISS on everything, really
 ik reach might be going too far..
 smart networking might be too far...
 
++++++++++++++++++++++++++++++
+Registration
+identify corresponding points between sets, find a transformation
+that minimizes the distance 
+
+-------------------------------------------------------------------------------------------
+=======================================   Points Pipeline   =================================
+-------------------------------------------------------------------------------------------
+
+    1 - collect points using arcore (device 1)
+    2 - refine points 
+    3 - send points to other device
+    4 - specify roughly where in space that device is
+    5 - use small amount of collected points (device 2) to get fine approximation of location
+
+
 -------------------------------------------------------------------------------------------
 =======================================    Networked Multiplayer   =================================
 -------------------------------------------------------------------------------------------
+
+
 
 "Local hosting" is on one computer
 LAN - 
