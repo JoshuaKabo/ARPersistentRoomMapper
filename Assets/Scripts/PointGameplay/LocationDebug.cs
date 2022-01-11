@@ -2,10 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine;
+using TMPro;
 
 public class LocationDebug : MonoBehaviour
 {
-    public Text locationDebugUIText;
+    public TextMeshProUGUI locationDebugUIText;
 
     // On update, debug display name, then position and rotation
     void Update()
