@@ -8,10 +8,18 @@ Maybe setup NuGet for deeper unity warnings
 ========================================   TODO   ========================================
 ------------------------------------------------------------------------------------------
 
+Broad: If I cannot share the same map across everyone, 2 pivots:
+1) "Give up" - everyone scans their own, I lower game fidelity
+2) "Blinders" - the app is only aware of what each person has mapped
+    during the game. No premapping.
+    I can incorperate larger house use in-time as a mechanic.
+    Or just let players move for themselves.
+
 Tested in MappingScene:
 1. Test out device location services, do I really have whole house device x,y,z??
     If not: engineer my own location service, at least using the x,y,z coords of points and a raycast
-
+2. Try out covering the camera, do I still get 3d coords?
+3. See if I get independent coords for client and server
 
 Might want to get started on another aspect of this app, like zombies or ui, as a break
 
